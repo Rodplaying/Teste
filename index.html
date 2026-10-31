@@ -129,7 +129,8 @@ label.field-label{display:block;margin-bottom:var(--sp-2);font-size:var(--fs-sm)
 
 /* Específico do simulador */
 .section-head{margin:var(--sp-7) 0 var(--sp-4)}
-.stack{display:grid;gap:var(--sp-4)}
+.stack{display:grid;gap:var(--sp-4);grid-template-columns:minmax(0,1fr)}
+table.data td .input[type=text]{min-width:160px} table.data td .input[type=number]{min-width:90px}
 .toggle-row{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
 .breakdown{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
 .breakdown td{padding:var(--sp-2) 0;border-bottom:1px solid var(--border);color:var(--text-2)}
@@ -313,10 +314,19 @@ label.field-label{display:block;margin-bottom:var(--sp-2);font-size:var(--fs-sm)
     <div class="toolbar">
       <div><p class="eyebrow">Parâmetros da empresa</p><h2>Configuração</h2></div>
       <div class="actions">
-        <button class="btn" type="button" id="cfg-export">Exportar JSON</button>
-        <label class="btn" for="cfg-import-file" style="margin:0">Importar JSON</label>
-        <input type="file" id="cfg-import-file" accept="application/json" hidden>
+        <button class="btn" type="button" id="cfg-export">Exportar / importar</button>
         <button class="btn ghost" type="button" id="cfg-reset">Repor valores de fábrica</button>
+      </div>
+    </div>
+    <div class="card" id="cfg-io" hidden style="margin-bottom:var(--sp-4)">
+      <div class="card-title">Copiar ou colar configuração (JSON)</div>
+      <textarea class="input" id="cfg-json" rows="8" spellcheck="false" style="padding:var(--sp-3);font-family:var(--font-mono);font-size:var(--fs-xs);resize:vertical"></textarea>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-3)">
+        <button class="btn" type="button" id="cfg-copy">Copiar</button>
+        <button class="btn" type="button" id="cfg-download">Descarregar ficheiro</button>
+        <label class="btn" for="cfg-import-file" style="margin:0">Abrir ficheiro</label>
+        <input type="file" id="cfg-import-file" accept="application/json,.json" hidden>
+        <button class="btn primary" type="button" id="cfg-apply">Aplicar JSON colado</button>
       </div>
     </div>
     <p style="color:var(--text-2);margin-top:0">As alterações aplicam-se de imediato e ficam guardadas neste browser.</p>
@@ -462,7 +472,7 @@ function mergeConfig(c) {
     params: Object.assign(d.params, c.params || {})
   };
 }
-function saveConfig() { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); }
+function saveConfig() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); } catch (e) {} }
 
 /* ===================== FORMATAÇÃO ===================== */
 function group(n, dec = 0) {
@@ -820,22 +830,38 @@ $('c-consumo-modo').addEventListener('change', () => {
 });
 document.querySelectorAll('#tab-sim input, #tab-sim select').forEach(el => el.addEventListener('input', render));
 
-$('cfg-export').onclick = () => {
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+const cfgText = () => JSON.stringify(config, null, 2);
+function applyJson(txt) {
+  try { config = mergeConfig(JSON.parse(txt)); saveConfig(); reloadConfigUI(); $('cfg-json').value = cfgText(); toast('Configuração importada'); }
+  catch { toast('JSON inválido'); }
+}
+$('cfg-export').onclick = () => { const io = $('cfg-io'); io.hidden = !io.hidden; $('cfg-json').value = cfgText(); };
+$('cfg-copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(cfgText()); toast('Configuração copiada'); }
+  catch { const t = $('cfg-json'); t.value = cfgText(); t.select(); toast('Seleciona o texto e copia manualmente'); }
+};
+$('cfg-download').onclick = () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([cfgText()], { type: 'application/json' }));
   a.download = `config-simulador-solar-${new Date().toISOString().slice(0, 10)}.json`; a.click();
-  URL.revokeObjectURL(a.href); toast('Configuração exportada');
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
+$('cfg-apply').onclick = () => applyJson($('cfg-json').value);
 $('cfg-import-file').onchange = async (e) => {
-  const f = e.target.files[0]; if (!f) return;
-  try { config = mergeConfig(JSON.parse(await f.text())); saveConfig(); reloadConfigUI(); toast('Configuração importada'); }
-  catch { toast('Ficheiro inválido'); }
-  e.target.value = '';
+  const f = e.target.files[0]; if (f) applyJson(await f.text()); e.target.value = '';
 };
+let resetArmed = null;
 $('cfg-reset').onclick = () => {
-  if (!confirm('Repor todos os parâmetros de fábrica? As alterações atuais perdem-se.')) return;
+  const b = $('cfg-reset');
+  if (!resetArmed) {
+    b.textContent = 'Confirmar: repor tudo?'; b.classList.remove('ghost');
+    resetArmed = setTimeout(() => { resetArmed = null; b.textContent = 'Repor valores de fábrica'; b.classList.add('ghost'); }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null; b.textContent = 'Repor valores de fábrica'; b.classList.add('ghost');
   config = structuredClone(DEFAULT_CONFIG); saveConfig(); reloadConfigUI(); toast('Valores de fábrica repostos');
 };
+const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
+if (embedded) { $('btn-print').hidden = true; $('cfg-download').hidden = true; }
 $('btn-print').onclick = () => { setTab('sim'); setTimeout(() => window.print(), 150); };
 window.addEventListener('beforeprint', () => document.documentElement.setAttribute('data-theme', 'light'));
 window.addEventListener('afterprint', () => document.documentElement.removeAttribute('data-theme'));
