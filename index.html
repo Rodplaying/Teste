@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de Vendas · Painéis Solares</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* RODRIGO DESIGN SYSTEM — v2 "Holofote" */
+:root {
+  color-scheme: dark;
+  --bg:#0E1A14; --surface:#15261D; --surface-2:#1D3328; --border:#22382B; --border-strong:#2E4A3A;
+  --border-input:#62816E; --chalk-line:#F2EFE6;
+  --text:#F2EFE6; --text-2:#C9D4CC; --text-3:#A3B3A8; --text-4:#8A9A8F;
+  --accent:#D4F55A; --accent-mark:#D4F55A; --accent-ink:#D4F55A; --accent-fill:#D4F55A; --on-accent:#0E1A14; --on-lime:#0E1A14;
+  --accent-strong:#E6FA9A; --accent-dim:rgba(212,245,90,0.12); --accent-line:rgba(212,245,90,0.40);
+  --success:#5EE0A0; --success-dim:rgba(94,224,160,0.12);
+  --warning:#FFD23F; --warning-dim:rgba(255,210,63,0.12);
+  --danger:#FF8A5B; --danger-dim:rgba(255,138,91,0.14);
+  --chart-1:#D4F55A; --chart-2:#7CC4FF; --chart-3:#FF8A5B; --chart-4:#FF7AB8; --chart-5:#FFD23F; --chart-6:#5EE0A0; --chart-7:#8A9A8F;
+  --chart-grid:rgba(242,239,230,0.07); --chart-fill:rgba(212,245,90,0.10);
+  --font-display:'Big Shoulders Display','Arial Narrow','Roboto Condensed',sans-serif;
+  --font-ui:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'Cascadia Code',monospace;
+  --fs-xs:0.75rem; --fs-sm:0.875rem; --fs-base:1rem; --fs-md:1.25rem; --fs-lg:1.75rem; --fs-xl:2.5rem;
+  --fs-2xl:clamp(2.75rem,12vw,4rem); --fs-hero:clamp(3.25rem,9vw,7rem);
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --radius-sm:10px; --radius:16px; --radius-lg:24px; --radius-pill:999px;
+  --shadow:none; --shadow-lg:0 12px 32px rgba(0,0,0,0.45);
+  --ease:cubic-bezier(0.16,1,0.3,1); --t-fast:120ms; --t-base:200ms;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:#F2EFE6; --surface:#FAF8F2; --surface-2:#E6E1D3; --border:#D9D3C3; --border-strong:#C2BBA8; --border-input:#738479; --chalk-line:#0E1A14;
+    --text:#0E1A14; --text-2:#2E4A3A; --text-3:#435A4C; --text-4:#4F6457;
+    --accent:#D4F55A; --accent-mark:#5E7D00; --accent-ink:#3F5A00; --accent-fill:#0E1A14; --on-accent:#D4F55A;
+    --accent-strong:#1D3328; --accent-dim:rgba(94,125,0,0.12); --accent-line:rgba(63,90,0,0.70);
+    --success:#0E6640; --success-dim:rgba(14,102,64,0.10); --warning:#704F00; --warning-dim:rgba(112,79,0,0.10);
+    --danger:#9E3208; --danger-dim:rgba(158,50,8,0.10);
+    --chart-1:#5E7D00; --chart-2:#1F6FB8; --chart-3:#D2541E; --chart-4:#B0307A; --chart-5:#94661C; --chart-6:#178A5C; --chart-7:#6E7F74;
+    --chart-grid:rgba(14,26,20,0.08); --chart-fill:rgba(94,125,0,0.10); --shadow-lg:0 12px 32px rgba(14,26,20,0.16);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:#F2EFE6; --surface:#FAF8F2; --surface-2:#E6E1D3; --border:#D9D3C3; --border-strong:#C2BBA8; --border-input:#738479; --chalk-line:#0E1A14;
+  --text:#0E1A14; --text-2:#2E4A3A; --text-3:#435A4C; --text-4:#4F6457;
+  --accent:#D4F55A; --accent-mark:#5E7D00; --accent-ink:#3F5A00; --accent-fill:#0E1A14; --on-accent:#D4F55A;
+  --accent-strong:#1D3328; --accent-dim:rgba(94,125,0,0.12); --accent-line:rgba(63,90,0,0.70);
+  --success:#0E6640; --success-dim:rgba(14,102,64,0.10); --warning:#704F00; --warning-dim:rgba(112,79,0,0.10);
+  --danger:#9E3208; --danger-dim:rgba(158,50,8,0.10);
+  --chart-1:#5E7D00; --chart-2:#1F6FB8; --chart-3:#D2541E; --chart-4:#B0307A; --chart-5:#94661C; --chart-6:#178A5C; --chart-7:#6E7F74;
+  --chart-grid:rgba(14,26,20,0.08); --chart-fill:rgba(94,125,0,0.10); --shadow-lg:0 12px 32px rgba(14,26,20,0.16);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:var(--fs-base);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,.display{margin:0;font-family:var(--font-display);font-weight:800;text-transform:uppercase;line-height:1.02;letter-spacing:0.005em}
+h1{font-size:var(--fs-xl)} h2{font-size:var(--fs-lg)}
+h3{margin:0;font-size:var(--fs-md);font-weight:700;line-height:1.25}
+a{color:var(--accent-ink);text-decoration:none;font-weight:600}
+:focus-visible{outline:2px solid var(--accent-ink);outline-offset:3px}
+::selection{background:var(--accent);color:var(--on-lime)}
+.num,.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.container{max-width:1200px;margin:0 auto;padding:0 var(--sp-5)}
+@media (max-width:600px){.container{padding:0 var(--sp-4)}}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-4);padding:var(--sp-7) 0 var(--sp-5);border-bottom:2px solid var(--chalk-line);margin-bottom:var(--sp-6)}
+.page-header .subtitle{color:var(--text-2);margin-top:var(--sp-2)}
+.page-header .meta{color:var(--text-4);font-size:var(--fs-xs);font-family:var(--font-mono)}
+.eyebrow{font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 var(--sp-2)}
+.grid{display:grid;gap:var(--sp-4)}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)}
+.toolbar .actions{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--sp-5)}
+.card-title{font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-3);margin-bottom:var(--sp-3)}
+.kpi-value{font-family:var(--font-display);font-weight:800;font-size:var(--fs-xl);line-height:1;font-variant-numeric:tabular-nums}
+.kpi-value.hero{font-size:var(--fs-2xl);color:var(--accent-ink)}
+.kpi-sub{display:block;margin-top:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-3)}
+.kpi-delta{display:inline-flex;align-items:center;gap:var(--sp-1);margin-top:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:600;padding:3px var(--sp-2);border-radius:var(--radius-pill)}
+.kpi-delta.up{color:var(--success);background:var(--success-dim)}
+.kpi-delta.down{color:var(--danger);background:var(--danger-dim)}
+.kpi-delta.flat{color:var(--text-2);background:var(--surface-2)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:600;padding:3px 10px;border-radius:var(--radius-pill)}
+.badge.accent{color:var(--accent-ink);background:var(--accent-dim)}
+.badge.success{color:var(--success);background:var(--success-dim)}
+.badge.warning{color:var(--warning);background:var(--warning-dim)}
+.badge.danger{color:var(--danger);background:var(--danger-dim)}
+.badge.neutral{color:var(--text-2);background:var(--surface-2)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:var(--success)} .dot.alert{background:var(--danger);border-radius:2px} .dot.unknown{background:var(--text-4)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-5);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:600;border-radius:var(--radius-sm);border:1px solid var(--border-input);background:transparent;color:var(--text);cursor:pointer;text-decoration:none;transition:all var(--t-fast) var(--ease)}
+.btn:hover{border-color:var(--accent-ink);color:var(--accent-ink)}
+.btn.primary{background:var(--accent-fill);border-color:var(--accent-fill);color:var(--on-accent);font-weight:700}
+.btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);color:var(--on-accent)}
+.btn.ghost{border-color:transparent;color:var(--text-2)}
+.btn.ghost:hover{color:var(--accent-ink)}
+.btn.sm{min-height:36px;padding:0 var(--sp-3);font-size:var(--fs-sm)}
+.btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--sp-4);border-radius:var(--radius-pill);border:1px solid var(--border-input);background:transparent;color:var(--text-2);font:500 var(--fs-sm)/1 var(--font-ui);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent-ink);background:var(--surface-2);color:var(--text);font-weight:600}
+.table-wrap{overflow-x:auto}
+table.data{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+table.data th{text-align:left;font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);padding:var(--sp-2) var(--sp-3);border-bottom:2px solid var(--chalk-line);white-space:nowrap}
+table.data td{padding:var(--sp-3);border-bottom:1px solid var(--border);color:var(--text-2)}
+table.data td:first-child{color:var(--text);font-weight:600}
+table.data td.num,table.data th.num{text-align:right}
+table.data td.num{color:var(--text);font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+table.data tr:hover td{background:var(--surface-2)}
+table.data td .input{min-height:36px;width:100%}
+.input,select.input{min-height:44px;padding:0 var(--sp-4);font-family:var(--font-ui);font-size:var(--fs-base);background:var(--surface);color:var(--text);border:1px solid var(--border-input);border-radius:var(--radius-sm);transition:border-color var(--t-fast) var(--ease);width:100%}
+.input:focus{border-color:var(--accent-ink)}
+.input:focus-visible{outline:2px solid var(--accent-ink);outline-offset:1px}
+.input[type=number]{font-family:var(--font-mono)}
+label.field-label{display:block;margin-bottom:var(--sp-2);font-size:var(--fs-sm);font-weight:600;color:var(--text)}
+.hint{display:block;margin-top:var(--sp-1);font-size:var(--fs-xs);color:var(--text-4)}
+.tabs{display:inline-flex;gap:var(--sp-1);padding:var(--sp-1);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-pill)}
+.tab{min-height:44px;padding:0 var(--sp-4);border:none;border-radius:var(--radius-pill);background:transparent;color:var(--text-2);font:500 var(--fs-sm)/1 var(--font-ui);cursor:pointer}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{background:var(--accent-dim);color:var(--accent-ink);font-weight:700}
+.chalk{border:none;border-top:2px solid var(--chalk-line);margin:var(--sp-7) 0}
+.page-footer{color:var(--text-4);font-size:var(--fs-xs);font-family:var(--font-mono);padding:var(--sp-5) 0 var(--sp-7);border-top:1px solid var(--border);margin-top:var(--sp-8)}
+
+/* Específico do simulador */
+.section-head{margin:var(--sp-7) 0 var(--sp-4)}
+.stack{display:grid;gap:var(--sp-4)}
+.toggle-row{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.breakdown{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.breakdown td{padding:var(--sp-2) 0;border-bottom:1px solid var(--border);color:var(--text-2)}
+.breakdown td.num{text-align:right;color:var(--text);font-family:var(--font-mono)}
+.breakdown tr.total td{border-top:2px solid var(--chalk-line);border-bottom:none;color:var(--text);font-weight:700;padding-top:var(--sp-3)}
+.breakdown tr.sub td{color:var(--text-3)}
+.chart-box{position:relative;height:280px}
+.status-line{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)}
+[hidden]{display:none !important}
+.client-only{display:none}
+.toast{position:fixed;bottom:var(--sp-5);left:50%;transform:translateX(-50%);background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-pill);padding:var(--sp-2) var(--sp-5);box-shadow:var(--shadow-lg);font-size:var(--fs-sm);opacity:0;pointer-events:none;transition:opacity var(--t-base) var(--ease)}
+.toast.show{opacity:1}
+
+@media print {
+  :root{--bg:#fff;--surface:#fff;--text:#0E1A14;--text-2:#2E4A3A;--text-3:#435A4C;--text-4:#4F6457;--chalk-line:#0E1A14;--border:#D9D3C3;--accent-ink:#3F5A00}
+  .no-print,.toolbar{display:none !important}
+  .seller-only{display:none !important}
+  .client-only{display:block}
+  .card{break-inside:avoid}
+  #tab-config{display:none !important}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Ferramenta comercial · Fotovoltaico</p>
+      <h1>Simulador de Vendas Solar</h1>
+      <div class="subtitle">Dimensiona o sistema, calcula o preço e mostra ao cliente quanto poupa e quando recupera o investimento.</div>
+    </div>
+    <div class="meta"><span id="today"></span> · v1.0</div>
+  </header>
+
+  <div class="toolbar no-print">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="tab-sim" id="t-sim">Simulação</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tab-config" id="t-config">Configuração</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btn-print" type="button">
+        <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>
+        Proposta (PDF)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ SIMULAÇÃO ============ -->
+  <section id="tab-sim" role="tabpanel" aria-labelledby="t-sim">
+    <div class="card">
+      <div class="card-title">Dados do cliente</div>
+      <div class="grid grid-3">
+        <div>
+          <label class="field-label" for="c-nome">Nome do cliente</label>
+          <input class="input" id="c-nome" type="text" placeholder="ex: Maria Santos">
+        </div>
+        <div>
+          <label class="field-label" for="c-regiao">Região</label>
+          <select class="input" id="c-regiao"></select>
+          <span class="hint" id="c-regiao-hint"></span>
+        </div>
+        <div>
+          <label class="field-label" for="c-tipo">Tipo de cliente</label>
+          <select class="input" id="c-tipo"></select>
+          <span class="hint">Define o perfil de consumo diurno</span>
+        </div>
+        <div>
+          <label class="field-label" for="c-consumo-modo">Indicar consumo por</label>
+          <select class="input" id="c-consumo-modo">
+            <option value="kwh">kWh por mês</option>
+            <option value="eur">Fatura em € por mês</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="c-consumo" id="c-consumo-label">Consumo mensal (kWh)</label>
+          <input class="input" id="c-consumo" type="number" min="0" step="10" value="450">
+          <span class="hint" id="c-consumo-hint"></span>
+        </div>
+        <div>
+          <label class="field-label" for="c-tarifa">Preço da eletricidade (€/kWh)</label>
+          <input class="input" id="c-tarifa" type="number" min="0" step="0.005" value="0.19">
+        </div>
+        <div>
+          <label class="field-label" for="c-cobertura">Cobertura alvo do consumo (%)</label>
+          <input class="input" id="c-cobertura" type="number" min="10" max="150" step="5" value="70">
+        </div>
+        <div>
+          <label class="field-label" for="c-painel">Modelo de painel</label>
+          <select class="input" id="c-painel"></select>
+        </div>
+        <div>
+          <label class="field-label" for="c-npaineis">Nº de painéis (0 = automático)</label>
+          <input class="input" id="c-npaineis" type="number" min="0" step="1" value="0">
+          <span class="hint" id="c-npaineis-hint"></span>
+        </div>
+        <div>
+          <label class="field-label" for="c-desconto">Desconto comercial (%)</label>
+          <input class="input" id="c-desconto" type="number" min="0" step="0.5" value="0">
+          <span class="hint" id="c-desconto-hint"></span>
+        </div>
+        <div>
+          <label class="field-label">Opções</label>
+          <div class="toggle-row">
+            <button class="chip" type="button" id="c-bateria" aria-pressed="false">Bateria</button>
+            <button class="chip" type="button" id="c-financiar" aria-pressed="false">Financiamento</button>
+            <button class="chip" type="button" id="c-apoio" aria-pressed="false">Apoio estatal</button>
+          </div>
+        </div>
+        <div id="wrap-bateria-kwh" hidden>
+          <label class="field-label" for="c-bateria-kwh">Capacidade da bateria (kWh)</label>
+          <input class="input" id="c-bateria-kwh" type="number" min="1" step="0.5" value="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head"><p class="eyebrow">Resultado</p><h2>Proposta para <span id="r-nome">o cliente</span></h2></div>
+
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="card-title">Sistema proposto</div>
+        <div class="kpi-value" id="k-kwp">—</div>
+        <span class="kpi-sub" id="k-kwp-sub"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">Investimento do cliente</div>
+        <div class="kpi-value" id="k-preco">—</div>
+        <span class="kpi-sub" id="k-preco-sub"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">Poupança no 1.º ano</div>
+        <div class="kpi-value" id="k-poup">—</div>
+        <span class="kpi-sub" id="k-poup-sub"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">Retorno do investimento</div>
+        <div class="kpi-value hero" id="k-payback">—</div>
+        <span class="kpi-sub" id="k-payback-sub"></span>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:var(--sp-4)">
+      <div class="card">
+        <div class="card-title">Saldo acumulado do cliente</div>
+        <div class="chart-box"><canvas id="ch-cash"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Energia no 1.º ano</div>
+        <div class="chart-box"><canvas id="ch-energy"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:var(--sp-4)">
+      <div class="card">
+        <div class="card-title">Benefícios para o cliente</div>
+        <table class="breakdown" id="tb-cliente"></table>
+        <div class="status-line" id="st-cliente"></div>
+      </div>
+      <div class="card seller-only">
+        <div class="card-title">Rentabilidade da venda (interno)</div>
+        <table class="breakdown" id="tb-venda"></table>
+        <div class="status-line" id="st-venda"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:var(--sp-4)">
+      <div class="card-title">Projeção ano a ano</div>
+      <div class="table-wrap">
+        <table class="data" id="tb-anos">
+          <thead><tr>
+            <th>Ano</th><th class="num">Produção (kWh)</th><th class="num">Autoconsumo (kWh)</th><th class="num">Excedente (kWh)</th>
+            <th class="num">Preço (€/kWh)</th><th class="num">Poupança</th><th class="num" id="th-fin">Prestação</th><th class="num">Saldo acumulado</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONFIGURAÇÃO ============ -->
+  <section id="tab-config" role="tabpanel" aria-labelledby="t-config" hidden>
+    <div class="toolbar">
+      <div><p class="eyebrow">Parâmetros da empresa</p><h2>Configuração</h2></div>
+      <div class="actions">
+        <button class="btn" type="button" id="cfg-export">Exportar JSON</button>
+        <label class="btn" for="cfg-import-file" style="margin:0">Importar JSON</label>
+        <input type="file" id="cfg-import-file" accept="application/json" hidden>
+        <button class="btn ghost" type="button" id="cfg-reset">Repor valores de fábrica</button>
+      </div>
+    </div>
+    <p style="color:var(--text-2);margin-top:0">As alterações aplicam-se de imediato e ficam guardadas neste browser.</p>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-title">Catálogo de painéis</div>
+        <div class="table-wrap">
+          <table class="data" id="cfg-paineis">
+            <thead><tr><th>Modelo</th><th class="num">Potência (Wp)</th><th class="num">Custo unitário (€)</th><th class="num">Área (m²)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="btn sm" type="button" id="cfg-add-painel" style="margin-top:var(--sp-3)">+ Adicionar painel</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Regiões e produção específica</div>
+        <div class="table-wrap">
+          <table class="data" id="cfg-regioes">
+            <thead><tr><th>Região</th><th class="num">Produção (kWh/kWp/ano)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="btn sm" type="button" id="cfg-add-regiao" style="margin-top:var(--sp-3)">+ Adicionar região</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Perfis de cliente</div>
+        <div class="table-wrap">
+          <table class="data" id="cfg-perfis">
+            <thead><tr><th>Perfil</th><th class="num">Consumo diurno (%)</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="btn sm" type="button" id="cfg-add-perfil" style="margin-top:var(--sp-3)">+ Adicionar perfil</button>
+      </div>
+
+      <div id="cfg-groups" class="stack"></div>
+    </div>
+  </section>
+
+  <footer class="page-footer">simulador-solar · estimativas com base nos parâmetros configurados; não substitui estudo técnico no local · gerado localmente</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+/* ===================== CONFIGURAÇÃO POR DEFEITO ===================== */
+const STORAGE_KEY = 'simulador-solar-config-v1';
+const DEFAULT_CONFIG = {
+  paineis: [
+    { nome: 'Mono 430 Wp', potencia: 430, custo: 95, area: 1.95 },
+    { nome: 'Mono 450 Wp Premium', potencia: 450, custo: 125, area: 2.0 },
+    { nome: 'Bifacial 500 Wp', potencia: 500, custo: 150, area: 2.2 }
+  ],
+  regioes: [
+    { nome: 'Norte', producao: 1350 },
+    { nome: 'Centro', producao: 1450 },
+    { nome: 'Lisboa e Vale do Tejo', producao: 1550 },
+    { nome: 'Alentejo', producao: 1620 },
+    { nome: 'Algarve', producao: 1680 },
+    { nome: 'Madeira', producao: 1450 },
+    { nome: 'Açores', producao: 1200 }
+  ],
+  perfis: [
+    { nome: 'Doméstico (fora de dia)', diurno: 35 },
+    { nome: 'Doméstico (teletrabalho)', diurno: 50 },
+    { nome: 'Comércio / Serviços', diurno: 75 },
+    { nome: 'Indústria (turno diurno)', diurno: 85 }
+  ],
+  params: {
+    perdas: 14, degradacao: 0.5, vidaUtil: 25,
+    inversorKwp: 180, estruturaKwp: 90, instalacaoKwp: 150, custoFixo: 450,
+    bateriaKwh: 420, bateriaFixo: 600, bateriaCiclos: 300, bateriaEficiencia: 90,
+    margem: 25, iva: 6, comissao: 5, descontoMax: 10,
+    precoExcedente: 0.05, inflacaoEnergia: 3, manutencao: 60, manutencaoInflacao: 2,
+    apoioValor: 1100, apoioPct: 85,
+    taxaJuro: 6.9, prazoMeses: 84,
+    paybackBom: 7, paybackMax: 10
+  }
+};
+
+const PARAM_GROUPS = [
+  { titulo: 'Técnicos', campos: [
+    ['perdas', 'Perdas do sistema (%)', 0.5, 'Cablagem, temperatura, sujidade, inversor'],
+    ['degradacao', 'Degradação anual dos painéis (%)', 0.05],
+    ['vidaUtil', 'Horizonte de análise (anos)', 1],
+  ]},
+  { titulo: 'Custos de instalação', campos: [
+    ['inversorKwp', 'Inversor (€/kWp)', 5],
+    ['estruturaKwp', 'Estrutura e cablagem (€/kWp)', 5],
+    ['instalacaoKwp', 'Mão de obra (€/kWp)', 5],
+    ['custoFixo', 'Custos fixos por obra (€)', 10, 'Deslocação, licenciamento, projeto'],
+  ]},
+  { titulo: 'Bateria', campos: [
+    ['bateriaKwh', 'Custo por kWh de capacidade (€)', 5],
+    ['bateriaFixo', 'Custo fixo da bateria (€)', 10, 'Inversor híbrido, instalação'],
+    ['bateriaCiclos', 'Ciclos úteis por ano', 10],
+    ['bateriaEficiencia', 'Eficiência ida-e-volta (%)', 1],
+  ]},
+  { titulo: 'Preço e comissões', campos: [
+    ['margem', 'Margem bruta (% do preço de venda)', 0.5],
+    ['iva', 'IVA (%)', 1],
+    ['comissao', 'Comissão do vendedor (% do preço s/ IVA)', 0.5],
+    ['descontoMax', 'Desconto máximo autorizado (%)', 0.5],
+  ]},
+  { titulo: 'Energia e manutenção', campos: [
+    ['precoExcedente', 'Venda de excedente à rede (€/kWh)', 0.005],
+    ['inflacaoEnergia', 'Subida anual do preço da eletricidade (%)', 0.1],
+    ['manutencao', 'Manutenção anual (€)', 5],
+    ['manutencaoInflacao', 'Subida anual da manutenção (%)', 0.1],
+  ]},
+  { titulo: 'Apoios e financiamento', campos: [
+    ['apoioValor', 'Apoio estatal máximo (€)', 50],
+    ['apoioPct', 'Apoio: % do investimento elegível', 1],
+    ['taxaJuro', 'Taxa de juro anual do financiamento (%)', 0.1],
+    ['prazoMeses', 'Prazo do financiamento (meses)', 6],
+  ]},
+  { titulo: 'Semáforo do retorno', campos: [
+    ['paybackBom', 'Retorno considerado bom (anos)', 0.5],
+    ['paybackMax', 'Retorno máximo aceitável (anos)', 0.5],
+  ]},
+];
+
+/* ===================== ESTADO ===================== */
+let config = loadConfig();
+const $ = (id) => document.getElementById(id);
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return mergeConfig(JSON.parse(raw));
+  } catch (e) {}
+  return structuredClone(DEFAULT_CONFIG);
+}
+function mergeConfig(c) {
+  const d = structuredClone(DEFAULT_CONFIG);
+  return {
+    paineis: Array.isArray(c.paineis) && c.paineis.length ? c.paineis : d.paineis,
+    regioes: Array.isArray(c.regioes) && c.regioes.length ? c.regioes : d.regioes,
+    perfis:  Array.isArray(c.perfis)  && c.perfis.length  ? c.perfis  : d.perfis,
+    params: Object.assign(d.params, c.params || {})
+  };
+}
+function saveConfig() { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); }
+
+/* ===================== FORMATAÇÃO ===================== */
+function group(n, dec = 0) {
+  const neg = n < 0; const s = Math.abs(n).toFixed(dec);
+  const [i, d] = s.split('.');
+  const g = i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (neg ? '−' : '') + g + (d ? ',' + d : '');
+}
+const eur = (n, dec = 0) => (n < 0 ? '−€' : '€') + group(Math.abs(n), dec);
+const num = (n, dec = 0) => group(n, dec);
+function anosMeses(a) {
+  if (!isFinite(a)) return 'Sem retorno';
+  return `${num(a, 1)} anos`;
+}
+
+/* ===================== MOTOR DE CÁLCULO ===================== */
+function readInputs() {
+  const P = config.params;
+  const modo = $('c-consumo-modo').value;
+  const tarifa = +$('c-tarifa').value || 0;
+  const v = +$('c-consumo').value || 0;
+  const consumoMensal = modo === 'kwh' ? v : (tarifa > 0 ? v / tarifa : 0);
+  return {
+    nome: $('c-nome').value.trim(),
+    regiao: config.regioes[+$('c-regiao').value] || config.regioes[0],
+    perfil: config.perfis[+$('c-tipo').value] || config.perfis[0],
+    painel: config.paineis[+$('c-painel').value] || config.paineis[0],
+    consumoMensal, tarifa,
+    cobertura: (+$('c-cobertura').value || 0) / 100,
+    nManual: Math.max(0, Math.round(+$('c-npaineis').value || 0)),
+    desconto: Math.min(Math.max(+$('c-desconto').value || 0, 0), 100) / 100,
+    bateria: $('c-bateria').getAttribute('aria-pressed') === 'true',
+    bateriaKwh: +$('c-bateria-kwh').value || 0,
+    financiar: $('c-financiar').getAttribute('aria-pressed') === 'true',
+    apoio: $('c-apoio').getAttribute('aria-pressed') === 'true',
+    P
+  };
+}
+
+function simular(inp) {
+  const { P, painel, regiao, perfil } = inp;
+  const consumoAnual = inp.consumoMensal * 12;
+  const yieldEsp = regiao.producao * (1 - P.perdas / 100);       // kWh/kWp/ano efetivo
+  const alvo = consumoAnual * inp.cobertura;
+  const nAuto = yieldEsp > 0 && painel.potencia > 0 ? Math.max(1, Math.ceil(alvo / yieldEsp / (painel.potencia / 1000))) : 0;
+  const n = inp.nManual || nAuto;
+  const kwp = n * painel.potencia / 1000;
+
+  // Custos
+  const custoPaineis = n * painel.custo;
+  const custoInversor = kwp * P.inversorKwp;
+  const custoEstrutura = kwp * P.estruturaKwp;
+  const custoMO = kwp * P.instalacaoKwp;
+  const custoBat = inp.bateria ? inp.bateriaKwh * P.bateriaKwh + P.bateriaFixo : 0;
+  const custoTotal = custoPaineis + custoInversor + custoEstrutura + custoMO + P.custoFixo + custoBat;
+
+  // Preço
+  const precoTabela = P.margem < 100 ? custoTotal / (1 - P.margem / 100) : custoTotal;
+  const descontoEur = precoTabela * inp.desconto;
+  const precoSemIva = precoTabela - descontoEur;
+  const iva = precoSemIva * P.iva / 100;
+  const precoFinal = precoSemIva + iva;
+  const apoio = inp.apoio ? Math.min(P.apoioValor, precoFinal * P.apoioPct / 100) : 0;
+  const investimentoCliente = precoFinal - apoio;
+  const comissao = precoSemIva * P.comissao / 100;
+  const lucro = precoSemIva - custoTotal - comissao;
+  const margemReal = precoSemIva > 0 ? lucro / precoSemIva : 0;
+
+  // Financiamento
+  let prestacao = 0, totalPago = 0;
+  if (inp.financiar && investimentoCliente > 0 && P.prazoMeses > 0) {
+    const r = P.taxaJuro / 100 / 12;
+    prestacao = r > 0 ? investimentoCliente * r / (1 - Math.pow(1 + r, -P.prazoMeses)) : investimentoCliente / P.prazoMeses;
+    totalPago = prestacao * P.prazoMeses;
+  }
+
+  // Energia ano a ano
+  const anos = [];
+  let acum = inp.financiar ? 0 : -investimentoCliente;
+  let payback = Infinity, poupancaTotal = 0;
+  const diurno = consumoAnual * perfil.diurno / 100;
+  const noturno = consumoAnual - diurno;
+  for (let a = 1; a <= P.vidaUtil; a++) {
+    const prod = kwp * yieldEsp * Math.pow(1 - P.degradacao / 100, a - 1);
+    const autoDireto = Math.min(prod, diurno);
+    let excedente = prod - autoDireto;
+    let viaBateria = 0;
+    if (inp.bateria) {
+      const capAno = inp.bateriaKwh * P.bateriaCiclos * (P.bateriaEficiencia / 100);
+      viaBateria = Math.min(excedente * (P.bateriaEficiencia / 100), capAno, noturno);
+      excedente = Math.max(0, excedente - viaBateria / (P.bateriaEficiencia / 100));
+    }
+    const autoconsumo = autoDireto + viaBateria;
+    const preco = inp.tarifa * Math.pow(1 + P.inflacaoEnergia / 100, a - 1);
+    const manut = P.manutencao * Math.pow(1 + P.manutencaoInflacao / 100, a - 1);
+    const poupanca = autoconsumo * preco + excedente * P.precoExcedente - manut;
+    const mesesFin = inp.financiar ? Math.max(0, Math.min(12, P.prazoMeses - (a - 1) * 12)) : 0;
+    const pagFin = prestacao * mesesFin;
+    const fluxo = poupanca - pagFin;
+    const antes = acum;
+    acum += fluxo;
+    if (!inp.financiar && payback === Infinity && acum >= 0 && fluxo > 0) payback = (a - 1) + (-antes / fluxo);
+    poupancaTotal += poupanca;
+    anos.push({ a, prod, autoconsumo, excedente, preco, poupanca, pagFin, acum, manut });
+  }
+  if (inp.financiar) {
+    // com financiamento: retorno = quando a poupança acumulada cobre o total pago
+    let s = 0;
+    for (const y of anos) { const antes = s; s += y.poupanca; if (s >= totalPago && payback === Infinity) payback = (y.a - 1) + (totalPago - antes) / y.poupanca; }
+  }
+  const a1 = anos[0] || { prod: 0, autoconsumo: 0, excedente: 0, poupanca: 0 };
+  const custoTotalCliente = inp.financiar ? totalPago : investimentoCliente;
+  const ganhoLiquido = poupancaTotal - custoTotalCliente;
+  const roi = custoTotalCliente > 0 ? ganhoLiquido / custoTotalCliente : 0;
+  const faturaAntes = consumoAnual * inp.tarifa;
+
+  return {
+    consumoAnual, yieldEsp, n, nAuto, kwp, area: n * (painel.area || 0),
+    custoPaineis, custoInversor, custoEstrutura, custoMO, custoFixo: P.custoFixo, custoBat, custoTotal,
+    precoTabela, descontoEur, precoSemIva, iva, precoFinal, apoio, investimentoCliente,
+    comissao, lucro, margemReal, prestacao, totalPago,
+    anos, a1, payback, poupancaTotal, ganhoLiquido, roi, faturaAntes,
+    autoSuf: consumoAnual ? a1.autoconsumo / consumoAnual : 0,
+    taxaAuto: a1.prod ? a1.autoconsumo / a1.prod : 0,
+    co2: a1.prod * 0.15 / 1000  // t CO2/ano (fator médio rede PT ~150 g/kWh)
+  };
+}
+
+/* ===================== RENDER ===================== */
+let PALETTE = [], charts = {};
+function tk(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyChartTheme() {
+  PALETTE = [1, 2, 3, 4, 5, 6, 7].map(i => tk(`--chart-${i}`));
+  Chart.defaults.font.family = tk('--font-mono');
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = tk('--text-4');
+  Chart.defaults.borderColor = tk('--chart-grid');
+  Object.assign(Chart.defaults.plugins.legend.labels, { boxWidth: 10, boxHeight: 10 });
+  Object.assign(Chart.defaults.plugins.tooltip, {
+    backgroundColor: tk('--surface-2'), titleColor: tk('--text'), bodyColor: tk('--text-2'),
+    borderColor: tk('--border-strong'), borderWidth: 1, cornerRadius: 10, padding: 10,
+  });
+}
+
+function rows(list) {
+  return list.map(([l, v, cls]) => `<tr class="${cls || ''}"><td>${l}</td><td class="num">${v}</td></tr>`).join('');
+}
+
+function render() {
+  if (!config.paineis.length || !config.regioes.length || !config.perfis.length) return;
+  const inp = readInputs();
+  const r = simular(inp);
+  const P = config.params;
+
+  // Hints
+  $('c-regiao-hint').textContent = `${num(inp.regiao.producao)} kWh/kWp/ano · ${num(r.yieldEsp)} após perdas`;
+  $('c-consumo-hint').textContent = $('c-consumo-modo').value === 'kwh'
+    ? `≈ ${eur(inp.consumoMensal * inp.tarifa)} por mês · ${num(r.consumoAnual)} kWh/ano`
+    : `≈ ${num(inp.consumoMensal)} kWh por mês · ${num(r.consumoAnual)} kWh/ano`;
+  $('c-npaineis-hint').textContent = `Sugestão automática: ${r.nAuto} painéis`;
+  const descEl = $('c-desconto');
+  const excede = inp.desconto * 100 > P.descontoMax;
+  descEl.classList.toggle('error', excede);
+  $('c-desconto-hint').textContent = excede ? `Acima do máximo autorizado (${num(P.descontoMax, 1)}%)` : `Máximo autorizado: ${num(P.descontoMax, 1)}%`;
+  $('c-desconto-hint').style.color = excede ? 'var(--danger)' : '';
+  $('r-nome').textContent = inp.nome || 'o cliente';
+
+  // KPIs
+  $('k-kwp').textContent = `${num(r.kwp, 2)} kWp`;
+  $('k-kwp-sub').textContent = `${r.n} × ${inp.painel.nome}${r.area ? ` · ${num(r.area, 1)} m²` : ''}${inp.bateria ? ` · bateria ${num(inp.bateriaKwh, 1)} kWh` : ''}`;
+  if (inp.financiar) {
+    $('k-preco').textContent = `${eur(r.prestacao)}/mês`;
+    $('k-preco-sub').textContent = `${P.prazoMeses} meses · ${num(P.taxaJuro, 1)}% · total ${eur(r.totalPago)}`;
+  } else {
+    $('k-preco').textContent = eur(r.investimentoCliente);
+    $('k-preco-sub').textContent = `IVA ${num(P.iva)}% incluído${r.apoio ? ` · apoio −${eur(r.apoio)}` : ''}`;
+  }
+  $('k-poup').textContent = eur(r.a1.poupanca);
+  const mensal = r.a1.poupanca / 12;
+  $('k-poup-sub').textContent = `${eur(mensal)}/mês · ${r.faturaAntes ? num(r.a1.poupanca / r.faturaAntes * 100) : 0}% da fatura`;
+  $('k-payback').textContent = anosMeses(r.payback);
+  $('k-payback-sub').textContent = `Ganho em ${P.vidaUtil} anos: ${eur(r.ganhoLiquido)} · ROI ${num(r.roi * 100)}%`;
+
+  // Benefícios cliente
+  const cli = [
+    ['Fatura anual atual', eur(r.faturaAntes)],
+    ['Produção no 1.º ano', `${num(r.a1.prod)} kWh`],
+    ['Autossuficiência', `${num(r.autoSuf * 100)}%`],
+    ['Taxa de autoconsumo', `${num(r.taxaAuto * 100)}%`],
+    ['Excedente vendido à rede', `${num(r.a1.excedente)} kWh`],
+    ['CO₂ evitado por ano', `${num(r.co2, 2)} t`],
+    ['Preço de tabela s/ IVA', eur(r.precoTabela), 'sub'],
+  ];
+  if (r.descontoEur) cli.push([`Desconto (${num(inp.desconto * 100, 1)}%)`, '−' + eur(r.descontoEur), 'sub']);
+  cli.push([`IVA (${num(P.iva)}%)`, eur(r.iva), 'sub']);
+  if (r.apoio) cli.push(['Apoio estatal', '−' + eur(r.apoio), 'sub']);
+  cli.push(['Investimento final', eur(r.investimentoCliente), 'total']);
+  $('tb-cliente').innerHTML = rows(cli);
+  let pbCls = 'success', pbDot = 'ok', pbTxt = 'Retorno rápido: argumento forte de venda';
+  if (!isFinite(r.payback) || r.payback > P.paybackMax) { pbCls = 'danger'; pbDot = 'alert'; pbTxt = 'Retorno acima do aceitável: rever dimensionamento ou preço'; }
+  else if (r.payback > P.paybackBom) { pbCls = 'warning'; pbDot = 'unknown'; pbTxt = 'Retorno razoável'; }
+  $('st-cliente').innerHTML = `<span class="badge ${pbCls}"><span class="dot ${pbDot}"></span>${pbTxt}</span>`;
+
+  // Venda (interno)
+  $('tb-venda').innerHTML = rows([
+    [`Painéis (${r.n} un.)`, eur(r.custoPaineis), 'sub'],
+    ['Inversor', eur(r.custoInversor), 'sub'],
+    ['Estrutura e cablagem', eur(r.custoEstrutura), 'sub'],
+    ['Mão de obra', eur(r.custoMO), 'sub'],
+    ['Custos fixos', eur(r.custoFixo), 'sub'],
+    ...(inp.bateria ? [['Bateria', eur(r.custoBat), 'sub']] : []),
+    ['Custo total', eur(r.custoTotal)],
+    ['Preço de venda s/ IVA', eur(r.precoSemIva)],
+    [`Comissão do vendedor (${num(P.comissao, 1)}%)`, eur(r.comissao)],
+    ['Custo por Wp instalado', `€${num(r.kwp ? r.custoTotal / (r.kwp * 1000) : 0, 2)}`],
+    ['Preço por Wp (s/ IVA)', `€${num(r.kwp ? r.precoSemIva / (r.kwp * 1000) : 0, 2)}`],
+    ['Lucro líquido da empresa', eur(r.lucro), 'total'],
+  ]);
+  const mr = r.margemReal * 100;
+  const mCls = r.lucro <= 0 ? ['danger', 'alert', 'Venda com prejuízo'] : mr < P.margem / 2 ? ['warning', 'unknown', 'Margem baixa'] : ['success', 'ok', 'Margem saudável'];
+  $('st-venda').innerHTML = `<span class="badge ${mCls[0]}"><span class="dot ${mCls[1]}"></span>${mCls[2]} · ${num(mr, 1)}% líquida</span>`;
+
+  // Tabela anos
+  $('th-fin').hidden = !inp.financiar;
+  $('tb-anos').querySelector('tbody').innerHTML = r.anos.map(y => `<tr>
+    <td>${y.a}</td><td class="num">${num(y.prod)}</td><td class="num">${num(y.autoconsumo)}</td><td class="num">${num(y.excedente)}</td>
+    <td class="num">${num(y.preco, 3)}</td><td class="num">${eur(y.poupanca)}</td>
+    ${inp.financiar ? `<td class="num">${y.pagFin ? '−' + eur(y.pagFin) : '—'}</td>` : ''}
+    <td class="num" style="color:${y.acum >= 0 ? 'var(--success)' : 'var(--danger)'}">${eur(y.acum)}</td></tr>`).join('');
+
+  drawCharts(r, inp);
+}
+
+function drawCharts(r, inp) {
+  if (typeof Chart === 'undefined') return;
+  applyChartTheme();
+  const labels = r.anos.map(y => y.a);
+  const acum = r.anos.map(y => Math.round(y.acum));
+  const cfgCash = {
+    type: 'line',
+    data: { labels: [0, ...labels], datasets: [
+      { label: inp.financiar ? 'Saldo com financiamento' : 'Saldo acumulado', data: [inp.financiar ? 0 : -Math.round(r.investimentoCliente), ...acum],
+        borderColor: PALETTE[0], backgroundColor: tk('--chart-fill'), fill: true, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 },
+      { label: 'Ponto de equilíbrio', data: [0, ...labels.map(() => 0)], borderColor: PALETTE[6], borderDash: [5, 5], pointRadius: 0, borderWidth: 1.5 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { title: (i) => `Ano ${i[0].label}`, label: (c) => `${c.dataset.label}: ${eur(c.parsed.y)}` } } },
+      scales: { y: { grid: { color: tk('--chart-grid') }, ticks: { callback: (v) => eur(v) } }, x: { grid: { display: false }, title: { display: true, text: 'Ano' } } } }
+  };
+  const cfgEnergy = {
+    type: 'bar',
+    data: { labels: ['Consumo', 'Produção'], datasets: [
+      { label: 'Autoconsumo', data: [Math.round(r.a1.autoconsumo), Math.round(r.a1.autoconsumo)], backgroundColor: PALETTE[0], borderRadius: 6, borderSkipped: false },
+      { label: 'Da rede', data: [Math.round(Math.max(0, r.consumoAnual - r.a1.autoconsumo)), 0], backgroundColor: PALETTE[6], borderRadius: 6, borderSkipped: false },
+      { label: 'Excedente', data: [0, Math.round(r.a1.excedente)], backgroundColor: PALETTE[1], borderRadius: 6, borderSkipped: false },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${num(c.parsed.x)} kWh` } } },
+      scales: { x: { stacked: true, grid: { color: tk('--chart-grid') }, ticks: { callback: (v) => num(v) + ' kWh' } }, y: { stacked: true, grid: { display: false } } } }
+  };
+  for (const [id, cfg] of [['ch-cash', cfgCash], ['ch-energy', cfgEnergy]]) {
+    if (charts[id] && charts[id].config.type === cfg.type) {
+      charts[id].data = cfg.data; charts[id].options = cfg.options; charts[id].update('none');
+    } else {
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart($(id), cfg);
+    }
+  }
+}
+function rebuildCharts() { Object.values(charts).forEach(c => c.destroy()); charts = {}; render(); }
+
+/* ===================== SELECTS DO CLIENTE ===================== */
+function fillSelect(el, list, label) {
+  const prev = el.value;
+  el.innerHTML = list.map((x, i) => `<option value="${i}">${escapeHtml(label(x))}</option>`).join('');
+  if (prev !== '' && +prev < list.length) el.value = prev;
+}
+function refreshSelects() {
+  fillSelect($('c-regiao'), config.regioes, x => x.nome);
+  fillSelect($('c-tipo'), config.perfis, x => `${x.nome} · ${x.diurno}% diurno`);
+  fillSelect($('c-painel'), config.paineis, x => `${x.nome} · ${x.potencia} Wp`);
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* ===================== UI DE CONFIGURAÇÃO ===================== */
+function listEditor(tableId, key, cols, blank) {
+  const tbody = $(tableId).querySelector('tbody');
+  const draw = () => {
+    tbody.innerHTML = config[key].map((row, i) => `<tr>${cols.map(([f, type, step]) =>
+      `<td${type === 'number' ? ' class="num"' : ''}><input class="input" data-i="${i}" data-f="${f}" type="${type}" ${step ? `step="${step}" min="0"` : ''} value="${escapeHtml(row[f] ?? '')}" aria-label="${f} ${i + 1}"></td>`).join('')}
+      <td><button class="btn ghost sm" type="button" data-del="${i}" aria-label="Remover linha ${i + 1}" ${config[key].length <= 1 ? 'disabled' : ''}>Remover</button></td></tr>`).join('');
+  };
+  tbody.addEventListener('input', (e) => {
+    const t = e.target; if (!t.dataset.f) return;
+    const row = config[key][+t.dataset.i];
+    row[t.dataset.f] = t.type === 'number' ? (+t.value || 0) : t.value;
+    saveConfig(); refreshSelects(); render();
+  });
+  tbody.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-del]'); if (!b) return;
+    config[key].splice(+b.dataset.del, 1); saveConfig(); draw(); refreshSelects(); render();
+  });
+  draw();
+  return { draw, add: () => { config[key].push(structuredClone(blank)); saveConfig(); draw(); refreshSelects(); render(); } };
+}
+
+let editors = {};
+function buildConfigUI() {
+  editors.paineis = listEditor('cfg-paineis', 'paineis', [['nome', 'text'], ['potencia', 'number', 5], ['custo', 'number', 1], ['area', 'number', 0.01]], { nome: 'Novo painel', potencia: 450, custo: 110, area: 2 });
+  editors.regioes = listEditor('cfg-regioes', 'regioes', [['nome', 'text'], ['producao', 'number', 10]], { nome: 'Nova região', producao: 1500 });
+  editors.perfis = listEditor('cfg-perfis', 'perfis', [['nome', 'text'], ['diurno', 'number', 1]], { nome: 'Novo perfil', diurno: 50 });
+  $('cfg-add-painel').onclick = editors.paineis.add;
+  $('cfg-add-regiao').onclick = editors.regioes.add;
+  $('cfg-add-perfil').onclick = editors.perfis.add;
+
+  $('cfg-groups').innerHTML = PARAM_GROUPS.map(g => `<div class="card"><div class="card-title">${g.titulo}</div><div class="grid grid-4">
+    ${g.campos.map(([k, l, step, hint]) => `<div><label class="field-label" for="p-${k}">${l}</label>
+      <input class="input" id="p-${k}" data-p="${k}" type="number" step="${step}" min="0">${hint ? `<span class="hint">${hint}</span>` : ''}</div>`).join('')}
+  </div></div>`).join('');
+  $('cfg-groups').addEventListener('input', (e) => {
+    const k = e.target.dataset.p; if (!k) return;
+    config.params[k] = +e.target.value || 0; saveConfig(); render();
+  });
+  fillParams();
+}
+function fillParams() {
+  for (const [k, v] of Object.entries(config.params)) { const el = $('p-' + k); if (el) el.value = v; }
+}
+function reloadConfigUI() { Object.values(editors).forEach(e => e.draw()); fillParams(); refreshSelects(); render(); }
+
+/* ===================== EVENTOS ===================== */
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+
+function setTab(which) {
+  const sim = which === 'sim';
+  $('t-sim').setAttribute('aria-selected', sim); $('t-config').setAttribute('aria-selected', !sim);
+  $('tab-sim').hidden = !sim; $('tab-config').hidden = sim;
+  if (sim) rebuildCharts();
+}
+$('t-sim').onclick = () => setTab('sim');
+$('t-config').onclick = () => setTab('config');
+
+for (const id of ['c-bateria', 'c-financiar', 'c-apoio']) {
+  $(id).addEventListener('click', () => {
+    const b = $(id); b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+    $('wrap-bateria-kwh').hidden = $('c-bateria').getAttribute('aria-pressed') !== 'true';
+    render();
+  });
+}
+$('c-consumo-modo').addEventListener('change', () => {
+  const tarifa = +$('c-tarifa').value || 0.19, el = $('c-consumo'), v = +el.value || 0;
+  if ($('c-consumo-modo').value === 'eur') { el.value = Math.round(v * tarifa); el.step = 5; $('c-consumo-label').textContent = 'Fatura mensal (€)'; }
+  else { el.value = Math.round(v / tarifa); el.step = 10; $('c-consumo-label').textContent = 'Consumo mensal (kWh)'; }
+  render();
+});
+document.querySelectorAll('#tab-sim input, #tab-sim select').forEach(el => el.addEventListener('input', render));
+
+$('cfg-export').onclick = () => {
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `config-simulador-solar-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+  URL.revokeObjectURL(a.href); toast('Configuração exportada');
+};
+$('cfg-import-file').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try { config = mergeConfig(JSON.parse(await f.text())); saveConfig(); reloadConfigUI(); toast('Configuração importada'); }
+  catch { toast('Ficheiro inválido'); }
+  e.target.value = '';
+};
+$('cfg-reset').onclick = () => {
+  if (!confirm('Repor todos os parâmetros de fábrica? As alterações atuais perdem-se.')) return;
+  config = structuredClone(DEFAULT_CONFIG); saveConfig(); reloadConfigUI(); toast('Valores de fábrica repostos');
+};
+$('btn-print').onclick = () => { setTab('sim'); setTimeout(() => window.print(), 150); };
+window.addEventListener('beforeprint', () => document.documentElement.setAttribute('data-theme', 'light'));
+window.addEventListener('afterprint', () => document.documentElement.removeAttribute('data-theme'));
+
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', rebuildCharts);
+new MutationObserver(rebuildCharts).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ===================== ARRANQUE ===================== */
+$('today').textContent = 'simulação de ' + new Date().toISOString().slice(0, 10);
+buildConfigUI();
+refreshSelects();
+$('c-regiao').value = 2; $('c-tipo').value = 1;
+render();
+document.fonts && document.fonts.ready.then(rebuildCharts);
+</script>
+</body>
+</html>
