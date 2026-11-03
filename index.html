@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de Vendas · Painéis Solares</title>
+<meta name="theme-color" content="#0E1A14">
+<meta name="description" content="Simulador comercial de sistemas fotovoltaicos: dimensionamento, preço, poupança e retorno.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Simulador Solar">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -141,6 +149,19 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
 .status-line{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)}
 [hidden]{display:none !important}
 .client-only{display:none}
+.hist-list{display:grid;gap:var(--sp-3)}
+.hist-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--sp-3);align-items:center}
+.hist-item.current{border-color:var(--accent-line)}
+.hist-item h3{font-size:var(--fs-base);overflow-wrap:anywhere}
+.hist-item .meta{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-4)}
+.hist-item .figs{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-4);margin-top:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-2)}
+.hist-item .figs b{color:var(--text);font-weight:600}
+.hist-item .notes{margin-top:var(--sp-2);font-size:var(--fs-sm);color:var(--text-3);overflow-wrap:anywhere}
+.hist-item .acts{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:flex-end}
+@media (max-width:600px){.hist-item{grid-template-columns:1fr}.hist-item .acts{justify-content:flex-start}}
+.empty{padding:var(--sp-7) var(--sp-5);text-align:center;color:var(--text-3);border:1px dashed var(--border-strong);border-radius:var(--radius)}
+.save-bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);margin:var(--sp-7) 0 var(--sp-4)}
+.save-bar .actions{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
 .toast{position:fixed;bottom:var(--sp-5);left:50%;transform:translateX(-50%);background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-pill);padding:var(--sp-2) var(--sp-5);box-shadow:var(--shadow-lg);font-size:var(--fs-sm);opacity:0;pointer-events:none;transition:opacity var(--t-base) var(--ease)}
 .toast.show{opacity:1}
 
@@ -150,7 +171,7 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
   .seller-only{display:none !important}
   .client-only{display:block}
   .card{break-inside:avoid}
-  #tab-config{display:none !important}
+  #tab-config,#tab-hist{display:none !important}
 }
 </style>
 </head>
@@ -162,15 +183,20 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
       <h1>Simulador de Vendas Solar</h1>
       <div class="subtitle">Dimensiona o sistema, calcula o preço e mostra ao cliente quanto poupa e quando recupera o investimento.</div>
     </div>
-    <div class="meta"><span id="today"></span> · v1.0</div>
+    <div class="meta"><span id="today"></span> · v1.1</div>
   </header>
 
   <div class="toolbar no-print">
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" aria-controls="tab-sim" id="t-sim">Simulação</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="tab-hist" id="t-hist">Histórico <span id="hist-count" class="mono"></span></button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="tab-config" id="t-config">Configuração</button>
     </div>
     <div class="actions">
+      <button class="btn" id="btn-install" type="button" hidden>
+        <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+        Instalar app
+      </button>
       <button class="btn" id="btn-print" type="button">
         <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>
         Proposta (PDF)
@@ -185,7 +211,15 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
       <div class="grid grid-3">
         <div>
           <label class="field-label" for="c-nome">Nome do cliente</label>
-          <input class="input" id="c-nome" type="text" placeholder="ex: Maria Santos">
+          <input class="input" id="c-nome" type="text" placeholder="ex: Maria Santos" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label" for="c-contacto">Contacto</label>
+          <input class="input" id="c-contacto" type="text" placeholder="Telefone ou email" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label" for="c-notas">Notas</label>
+          <input class="input" id="c-notas" type="text" placeholder="ex: telhado a sul, visita dia 12" autocomplete="off">
         </div>
         <div>
           <label class="field-label" for="c-regiao">Região</label>
@@ -246,7 +280,16 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
       </div>
     </div>
 
-    <div class="section-head"><p class="eyebrow">Resultado</p><h2>Proposta para <span id="r-nome">o cliente</span></h2></div>
+    <div class="save-bar">
+      <div><p class="eyebrow" id="r-eyebrow">Resultado</p><h2>Proposta para <span id="r-nome">o cliente</span></h2></div>
+      <div class="actions no-print">
+        <button class="btn ghost" type="button" id="btn-new">Nova simulação</button>
+        <button class="btn primary" type="button" id="btn-save">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/></svg>
+          <span id="btn-save-label">Guardar simulação</span>
+        </button>
+      </div>
+    </div>
 
     <div class="grid grid-4">
       <div class="card">
@@ -307,6 +350,43 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
         </table>
       </div>
     </div>
+  </section>
+
+  <!-- ============ HISTÓRICO ============ -->
+  <section id="tab-hist" role="tabpanel" aria-labelledby="t-hist" hidden>
+    <div class="toolbar">
+      <div><p class="eyebrow">Guardado neste telemóvel</p><h2>Histórico</h2></div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="bk-send">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 6l8 7 8-7"/></svg>
+          Enviar backup
+        </button>
+        <label class="btn" for="bk-file" style="margin:0">Restaurar backup</label>
+        <input type="file" id="bk-file" accept=".txt,.json,text/plain,application/json" hidden>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:var(--sp-4)">
+      <div class="card-title">Cópia de segurança</div>
+      <div class="status-line" id="bk-status" style="margin-top:0"></div>
+      <span class="hint" style="font-size:var(--fs-sm);margin-top:var(--sp-3)">O histórico fica só neste aparelho. "Enviar backup" abre a partilha do telemóvel com dois anexos: o ficheiro de backup (para restaurar) e uma folha CSV (para abrir no Excel). Escolhe o Gmail e envia para o teu próprio email.</span>
+    </div>
+
+    <div class="card" id="bk-restore" hidden style="margin-bottom:var(--sp-4);border-color:var(--accent-line)">
+      <div class="card-title">Restaurar backup</div>
+      <p style="margin:0 0 var(--sp-3);color:var(--text-2)" id="bk-restore-info"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--sp-2)">
+        <button class="btn primary" type="button" id="bk-restore-hist">Juntar simulações</button>
+        <button class="btn" type="button" id="bk-restore-all">Juntar simulações e repor configuração</button>
+        <button class="btn ghost" type="button" id="bk-restore-cancel">Cancelar</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:var(--sp-4)">
+      <label class="field-label" for="hist-search">Procurar</label>
+      <input class="input" id="hist-search" type="search" placeholder="Nome, contacto, região ou notas" autocomplete="off">
+    </div>
+    <div class="hist-list" id="hist-list"></div>
   </section>
 
   <!-- ============ CONFIGURAÇÃO ============ -->
@@ -373,7 +453,7 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="vendor/chart.umd.js"></script>
 <script>
 /* ===================== CONFIGURAÇÃO POR DEFEITO ===================== */
 const STORAGE_KEY = 'simulador-solar-config-v1';
@@ -451,6 +531,14 @@ const PARAM_GROUPS = [
     ['paybackMax', 'Retorno máximo aceitável (anos)', 0.5],
   ]},
 ];
+
+/* ===================== ARMAZENAMENTO ===================== */
+const HIST_KEY = 'simulador-solar-historico-v1';
+const BACKUP_KEY = 'simulador-solar-ultimo-backup';
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+};
 
 /* ===================== ESTADO ===================== */
 let config = loadConfig();
@@ -602,7 +690,7 @@ function simular(inp) {
 }
 
 /* ===================== RENDER ===================== */
-let PALETTE = [], charts = {};
+let PALETTE = [], charts = {}, lastSim = null;
 function tk(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 function applyChartTheme() {
   PALETTE = [1, 2, 3, 4, 5, 6, 7].map(i => tk(`--chart-${i}`));
@@ -703,6 +791,7 @@ function render() {
     ${inp.financiar ? `<td class="num">${y.pagFin ? '−' + eur(y.pagFin) : '—'}</td>` : ''}
     <td class="num" style="color:${y.acum >= 0 ? 'var(--success)' : 'var(--danger)'}">${eur(y.acum)}</td></tr>`).join('');
 
+  lastSim = { inp, r };
   drawCharts(r, inp);
 }
 
@@ -807,12 +896,15 @@ function reloadConfigUI() { Object.values(editors).forEach(e => e.draw()); fillP
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
 
 function setTab(which) {
-  const sim = which === 'sim';
-  $('t-sim').setAttribute('aria-selected', sim); $('t-config').setAttribute('aria-selected', !sim);
-  $('tab-sim').hidden = !sim; $('tab-config').hidden = sim;
-  if (sim) rebuildCharts();
+  for (const t of ['sim', 'hist', 'config']) {
+    $('t-' + t).setAttribute('aria-selected', t === which);
+    $('tab-' + t).hidden = t !== which;
+  }
+  if (which === 'sim') rebuildCharts();
+  if (which === 'hist') renderHist();
 }
 $('t-sim').onclick = () => setTab('sim');
+$('t-hist').onclick = () => setTab('hist');
 $('t-config').onclick = () => setTab('config');
 
 for (const id of ['c-bateria', 'c-financiar', 'c-apoio']) {
@@ -869,12 +961,243 @@ window.addEventListener('afterprint', () => document.documentElement.removeAttri
 matchMedia('(prefers-color-scheme: light)').addEventListener('change', rebuildCharts);
 new MutationObserver(rebuildCharts).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
+
+/* ===================== HISTÓRICO ===================== */
+let historico = store.get(HIST_KEY, []);
+if (!Array.isArray(historico)) historico = [];
+let currentId = null;
+
+const chipOn = (id) => $(id).getAttribute('aria-pressed') === 'true';
+function setChip(id, on) { $(id).setAttribute('aria-pressed', !!on); }
+function saveHist() {
+  const ok = store.set(HIST_KEY, historico);
+  if (!ok) toast('Não foi possível guardar neste aparelho');
+  return ok;
+}
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+const pl = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+function fmtDate(iso) {
+  const d = new Date(iso); const z = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+
+function snapshot() {
+  const { inp, r } = lastSim;
+  return {
+    nome: inp.nome, contacto: $('c-contacto').value.trim(), notas: $('c-notas').value.trim(),
+    entradas: {
+      regiao: inp.regiao.nome, perfil: inp.perfil.nome, painel: inp.painel.nome,
+      consumoModo: $('c-consumo-modo').value, consumo: +$('c-consumo').value || 0,
+      tarifa: inp.tarifa, cobertura: +$('c-cobertura').value || 0, nPaineis: inp.nManual,
+      desconto: +$('c-desconto').value || 0, bateria: inp.bateria, bateriaKwh: inp.bateriaKwh,
+      financiar: inp.financiar, apoio: inp.apoio
+    },
+    resumo: {
+      kwp: +r.kwp.toFixed(2), paineis: r.n, consumoAnual: Math.round(r.consumoAnual),
+      investimento: Math.round(r.investimentoCliente), prestacao: inp.financiar ? Math.round(r.prestacao) : 0,
+      poupancaAno1: Math.round(r.a1.poupanca), retornoAnos: isFinite(r.payback) ? +r.payback.toFixed(1) : null,
+      ganhoTotal: Math.round(r.ganhoLiquido), lucroEmpresa: Math.round(r.lucro)
+    },
+    parametros: structuredClone(config.params)
+  };
+}
+
+function saveSimulation() {
+  if (!lastSim) return;
+  if (!$('c-nome').value.trim()) { $('c-nome').classList.add('error'); $('c-nome').focus(); toast('Indica o nome do cliente para guardar'); return; }
+  const snap = snapshot(), now = new Date().toISOString();
+  const i = currentId ? historico.findIndex(h => h.id === currentId) : -1;
+  if (i >= 0) { historico[i] = { ...historico[i], ...snap, atualizado: now }; }
+  else { currentId = newId(); historico.unshift({ id: currentId, criado: now, atualizado: now, ...snap }); }
+  if (saveHist()) toast(i >= 0 ? 'Simulação atualizada' : 'Simulação guardada no histórico');
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  updateSaveState(); renderHist();
+}
+
+function findIdx(list, nome) { const i = list.findIndex(x => x.nome === nome); return i < 0 ? 0 : i; }
+function openSimulation(id) {
+  const h = historico.find(x => x.id === id); if (!h) return;
+  const e = h.entradas || {};
+  $('c-nome').value = h.nome || ''; $('c-contacto').value = h.contacto || ''; $('c-notas').value = h.notas || '';
+  $('c-regiao').value = findIdx(config.regioes, e.regiao);
+  $('c-tipo').value = findIdx(config.perfis, e.perfil);
+  $('c-painel').value = findIdx(config.paineis, e.painel);
+  $('c-consumo-modo').value = e.consumoModo === 'eur' ? 'eur' : 'kwh';
+  $('c-consumo-label').textContent = e.consumoModo === 'eur' ? 'Fatura mensal (€)' : 'Consumo mensal (kWh)';
+  $('c-consumo').value = e.consumo ?? 0; $('c-tarifa').value = e.tarifa ?? 0.19;
+  $('c-cobertura').value = e.cobertura ?? 70; $('c-npaineis').value = e.nPaineis ?? 0;
+  $('c-desconto').value = e.desconto ?? 0; $('c-bateria-kwh').value = e.bateriaKwh ?? 5;
+  setChip('c-bateria', e.bateria); setChip('c-financiar', e.financiar); setChip('c-apoio', e.apoio);
+  $('wrap-bateria-kwh').hidden = !e.bateria;
+  $('c-nome').classList.remove('error');
+  currentId = id; setTab('sim'); updateSaveState(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  const mudou = h.resumo && lastSim && Math.abs(Math.round(lastSim.r.investimentoCliente) - h.resumo.investimento) > 1;
+  toast(mudou ? `Aberta com os preços atuais (guardada: ${eur(h.resumo.investimento)})` : 'Simulação aberta');
+}
+
+function newSimulation() {
+  currentId = null;
+  for (const id of ['c-nome', 'c-contacto', 'c-notas']) $(id).value = '';
+  $('c-npaineis').value = 0; $('c-desconto').value = 0;
+  setChip('c-bateria', false); setChip('c-financiar', false); setChip('c-apoio', false);
+  $('wrap-bateria-kwh').hidden = true;
+  render(); updateSaveState(); $('c-nome').focus();
+}
+
+function updateSaveState() {
+  const h = currentId && historico.find(x => x.id === currentId);
+  if (!h) currentId = null;
+  $('btn-save-label').textContent = currentId ? 'Guardar alterações' : 'Guardar simulação';
+  $('r-eyebrow').textContent = currentId ? `Resultado · guardada ${fmtDate(h.criado)}` : 'Resultado';
+  $('hist-count').textContent = historico.length ? `(${historico.length})` : '';
+}
+
+let delArmed = null;
+function renderHist() {
+  const q = $('hist-search').value.trim().toLowerCase();
+  const list = historico.filter(h => !q || [h.nome, h.contacto, h.notas, h.entradas?.regiao].join(' ').toLowerCase().includes(q));
+  if (!historico.length) {
+    $('hist-list').innerHTML = `<div class="empty">Ainda não há simulações guardadas.<br>Faz uma simulação e carrega em <b>Guardar simulação</b>.</div>`;
+  } else if (!list.length) {
+    $('hist-list').innerHTML = `<div class="empty">Nenhuma simulação corresponde a "${escapeHtml(q)}".</div>`;
+  } else {
+    $('hist-list').innerHTML = list.map(h => {
+      const r = h.resumo || {}, e = h.entradas || {};
+      return `<article class="hist-item${h.id === currentId ? ' current' : ''}">
+        <div>
+          <h3>${escapeHtml(h.nome || 'Sem nome')}</h3>
+          <div class="meta">${fmtDate(h.criado)}${h.atualizado && h.atualizado !== h.criado ? ' · editada ' + fmtDate(h.atualizado) : ''}${h.contacto ? ' · ' + escapeHtml(h.contacto) : ''}</div>
+          <div class="figs">
+            <span><b>${num(r.kwp || 0, 2)} kWp</b> · ${r.paineis || 0} painéis</span>
+            <span>${e.financiar ? `<b>${eur(r.prestacao || 0)}/mês</b>` : `<b>${eur(r.investimento || 0)}</b>`}</span>
+            <span>poupa <b>${eur(r.poupancaAno1 || 0)}</b>/ano</span>
+            <span>retorno <b>${r.retornoAnos != null ? num(r.retornoAnos, 1) + ' anos' : '—'}</b></span>
+            <span>${escapeHtml(e.regiao || '')}</span>
+          </div>
+          ${h.notas ? `<div class="notes">${escapeHtml(h.notas)}</div>` : ''}
+        </div>
+        <div class="acts">
+          <button class="btn sm" type="button" data-open="${h.id}">Abrir</button>
+          <button class="btn ghost sm" type="button" data-del="${h.id}">${delArmed === h.id ? 'Confirmar apagar' : 'Apagar'}</button>
+        </div>
+      </article>`;
+    }).join('');
+  }
+  renderBackupStatus(); updateSaveState();
+}
+$('hist-list').addEventListener('click', (ev) => {
+  const o = ev.target.closest('[data-open]'); if (o) return openSimulation(o.dataset.open);
+  const d = ev.target.closest('[data-del]'); if (!d) return;
+  const id = d.dataset.del;
+  if (delArmed !== id) { delArmed = id; renderHist(); setTimeout(() => { if (delArmed === id) { delArmed = null; renderHist(); } }, 4000); return; }
+  delArmed = null; historico = historico.filter(h => h.id !== id);
+  if (currentId === id) currentId = null;
+  saveHist(); renderHist(); toast('Simulação apagada');
+});
+$('hist-search').addEventListener('input', renderHist);
+$('btn-save').onclick = saveSimulation;
+$('btn-new').onclick = newSimulation;
+$('c-nome').addEventListener('input', () => $('c-nome').classList.remove('error'));
+
+/* ===================== BACKUP ===================== */
+function renderBackupStatus() {
+  const last = store.get(BACKUP_KEY, null);
+  let cls = 'neutral', dot = 'unknown', txt;
+  if (!last) {
+    txt = 'Ainda não foi feito nenhum backup';
+    if (historico.length) { cls = 'warning'; dot = 'alert'; }
+  } else {
+    const dias = Math.floor((Date.now() - new Date(last.data)) / 86400000);
+    const quando = dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : `há ${dias} dias`;
+    const novos = historico.filter(h => (h.atualizado || h.criado) > last.data).length;
+    txt = `Último backup ${quando} (${pl(last.total, 'simulação', 'simulações')})` + (novos ? ` · ${pl(novos, 'alteração', 'alterações')} por guardar` : '');
+    if (dias > 14 && novos) { cls = 'warning'; dot = 'alert'; } else if (!novos) { cls = 'success'; dot = 'ok'; }
+  }
+  $('bk-status').innerHTML = `<span class="badge ${cls}"><span class="dot ${dot}"></span>${txt}</span>`;
+}
+
+function csvCell(v) { const s = v == null ? '' : String(v); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function buildCsv() {
+  const head = ['Data', 'Cliente', 'Contacto', 'Notas', 'Região', 'Perfil', 'Painel', 'Nº painéis', 'kWp', 'Consumo anual (kWh)',
+    'Preço eletricidade (€/kWh)', 'Bateria (kWh)', 'Financiamento', 'Apoio', 'Desconto (%)', 'Investimento (€)', 'Prestação (€/mês)',
+    'Poupança ano 1 (€)', 'Retorno (anos)', 'Ganho total (€)', 'Lucro empresa (€)'];
+  const dec = (n) => n == null ? '' : String(n).replace('.', ',');
+  const lines = historico.map(h => { const e = h.entradas || {}, r = h.resumo || {}; return [
+    fmtDate(h.criado), h.nome, h.contacto, h.notas, e.regiao, e.perfil, e.painel, r.paineis, dec(r.kwp), r.consumoAnual,
+    dec(e.tarifa), e.bateria ? dec(e.bateriaKwh) : '', e.financiar ? 'Sim' : 'Não', e.apoio ? 'Sim' : 'Não', dec(e.desconto),
+    r.investimento, r.prestacao || '', r.poupancaAno1, dec(r.retornoAnos), r.ganhoTotal, r.lucroEmpresa]; });
+  return '﻿' + [head, ...lines].map(l => l.map(csvCell).join(';')).join('\r\n');
+}
+function buildBackup() {
+  return JSON.stringify({ app: 'simulador-solar', versao: 1, criado: new Date().toISOString(), configuracao: config, historico }, null, 1);
+}
+function markBackup() { store.set(BACKUP_KEY, { data: new Date().toISOString(), total: historico.length }); renderBackupStatus(); }
+
+$('bk-send').onclick = async () => {
+  const dia = new Date().toISOString().slice(0, 10);
+  const files = [
+    new File([buildBackup()], `simulador-solar-backup-${dia}.txt`, { type: 'text/plain' }),
+    new File([buildCsv()], `simulador-solar-historico-${dia}.csv`, { type: 'text/csv' })
+  ];
+  const texto = `Backup do Simulador Solar de ${dia}: ${pl(historico.length, 'simulação', 'simulações')}.\nPara restaurar: abrir o simulador > Histórico > Restaurar backup > escolher o ficheiro .txt.`;
+  if (navigator.canShare && navigator.canShare({ files })) {
+    try { await navigator.share({ files, title: `Backup Simulador Solar ${dia}`, text: texto }); markBackup(); toast('Backup partilhado'); }
+    catch (err) { if (err.name !== 'AbortError') toast('Não foi possível partilhar o backup'); }
+    return;
+  }
+  // Computador ou browser sem partilha de ficheiros: descarrega os dois ficheiros
+  for (const f of files) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  markBackup(); toast('Ficheiros descarregados: anexa-os a um email');
+};
+
+let pendingRestore = null;
+$('bk-file').onchange = async (ev) => {
+  const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!data || data.app !== 'simulador-solar' || !Array.isArray(data.historico)) throw new Error();
+    pendingRestore = data;
+    const novas = data.historico.filter(h => !historico.some(x => x.id === h.id)).length;
+    $('bk-restore-info').textContent = `Backup de ${fmtDate(data.criado)} com ${pl(data.historico.length, 'simulação', 'simulações')} (${pl(novas, 'nova', 'novas')} neste aparelho). As simulações que já existem aqui não são duplicadas.`;
+    $('bk-restore').hidden = false; $('bk-restore').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch { toast('Este ficheiro não é um backup do simulador'); }
+};
+function doRestore(withConfig) {
+  if (!pendingRestore) return;
+  const byId = new Map(historico.map(h => [h.id, h]));
+  for (const h of pendingRestore.historico) {
+    const cur = byId.get(h.id);
+    if (!cur || (h.atualizado || h.criado) > (cur.atualizado || cur.criado)) byId.set(h.id, h);
+  }
+  historico = [...byId.values()].sort((a, b) => (b.criado > a.criado ? 1 : -1));
+  saveHist();
+  if (withConfig && pendingRestore.configuracao) { config = mergeConfig(pendingRestore.configuracao); saveConfig(); reloadConfigUI(); }
+  pendingRestore = null; $('bk-restore').hidden = true; renderHist();
+  toast(withConfig ? 'Simulações e configuração restauradas' : 'Simulações restauradas');
+}
+$('bk-restore-hist').onclick = () => doRestore(false);
+$('bk-restore-all').onclick = () => doRestore(true);
+$('bk-restore-cancel').onclick = () => { pendingRestore = null; $('bk-restore').hidden = true; };
+
+/* ===================== APP INSTALÁVEL ===================== */
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installPrompt = e; $('btn-install').hidden = false; });
+$('btn-install').onclick = async () => { if (!installPrompt) return; installPrompt.prompt(); await installPrompt.userChoice.catch(() => {}); installPrompt = null; $('btn-install').hidden = true; };
+window.addEventListener('appinstalled', () => { $('btn-install').hidden = true; toast('App instalada'); });
+if ('serviceWorker' in navigator && /^https:|^http:\/\/localhost/.test(location.href)) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 /* ===================== ARRANQUE ===================== */
 $('today').textContent = 'simulação de ' + new Date().toISOString().slice(0, 10);
 buildConfigUI();
 refreshSelects();
 $('c-regiao').value = 2; $('c-tipo').value = 1;
 render();
+renderHist();
 document.fonts && document.fonts.ready.then(rebuildCharts);
 </script>
 </body>

@@ -9,6 +9,16 @@ Simulador comercial configurável para propostas de sistemas fotovoltaicos. É u
 - Rentabilidade interna da venda (custos, comissão, lucro, €/Wp), escondida na proposta impressa.
 - Botão "Proposta (PDF)" para imprimir/guardar a proposta para o cliente.
 
+## Histórico e backup
+- "Guardar simulação" guarda o cliente (nome, contacto, notas), os dados introduzidos e os resultados no histórico deste aparelho.
+- No separador Histórico: procurar, abrir (recalcula com os preços atuais), editar e apagar simulações.
+- "Enviar backup" abre a partilha do telemóvel com um ficheiro de backup (.txt) e uma folha CSV para o Excel; no computador, descarrega os dois ficheiros.
+- "Restaurar backup" junta as simulações de um backup sem duplicar e, opcionalmente, repõe a configuração.
+
+## App instalável (PWA)
+- Publicada no GitHub Pages pelo workflow `.github/workflows/pages.yml` a cada push.
+- No Android: abrir o endereço no Chrome e escolher "Instalar app" (ou menu ⋮ > Adicionar ao ecrã principal). Funciona sem internet.
+
 ## Configuração
 - Catálogo de painéis, regiões (produção kWh/kWp/ano) e perfis de cliente, todos editáveis.
 - Custos (inversor, estrutura, mão de obra, fixos, bateria), margem, IVA, comissão, desconto máximo, preço do excedente, inflação da energia, manutenção, apoios, juro e prazo de financiamento, limites do semáforo de retorno.
