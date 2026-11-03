@@ -165,14 +165,63 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
 .toast{position:fixed;bottom:var(--sp-5);left:50%;transform:translateX(-50%);background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-pill);padding:var(--sp-2) var(--sp-5);box-shadow:var(--shadow-lg);font-size:var(--fs-sm);opacity:0;pointer-events:none;transition:opacity var(--t-base) var(--ease)}
 .toast.show{opacity:1}
 
-@media print {
-  :root{--bg:#fff;--surface:#fff;--text:#0E1A14;--text-2:#2E4A3A;--text-3:#435A4C;--text-4:#4F6457;--chalk-line:#0E1A14;--border:#D9D3C3;--accent-ink:#3F5A00}
-  .no-print,.toolbar{display:none !important}
-  .seller-only{display:none !important}
-  .client-only{display:block}
-  .card{break-inside:avoid}
-  #tab-config,#tab-hist{display:none !important}
+/* ===== Proposta (documento A4 só para impressão / PDF) ===== */
+#proposta{display:none}
+@page{size:A4;margin:12mm 13mm 14mm}
+@media print{
+  html,body{background:#fff !important}
+  body > .container,.toast{display:none !important}
+  #proposta{display:block}
 }
+#proposta{
+  --p-ink:#0E1A14;--p-ink-2:#2E4A3A;--p-ink-3:#55695C;--p-line:#D9D3C3;--p-soft:#F4F2EA;--p-lime:#D4F55A;--p-olive:#3F5A00;
+  color:var(--p-ink);background:#fff;font-family:var(--font-ui);font-size:10pt;line-height:1.45;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+#proposta *{box-sizing:border-box}
+#proposta .pg{break-after:page}
+#proposta .pg:last-child{break-after:auto}
+#proposta .p-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8mm;padding-bottom:4mm;border-bottom:2px solid var(--p-ink)}
+#proposta .p-brand img{max-height:16mm;max-width:60mm;display:block}
+#proposta .p-brand .nm{font-family:var(--font-display);font-weight:800;font-size:17pt;text-transform:uppercase;line-height:1}
+#proposta .p-brand .ct{color:var(--p-ink-3);font-size:8pt;margin-top:1.5mm}
+#proposta .p-ref{text-align:right;font-family:var(--font-mono);font-size:8pt;color:var(--p-ink-2);line-height:1.6;white-space:nowrap}
+#proposta .p-ref b{color:var(--p-ink);font-weight:600}
+#proposta .eyeb{font-family:var(--font-mono);font-size:7.5pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--p-olive);margin:0 0 1.5mm}
+#proposta h1{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:26pt;line-height:1;margin:0 0 1.5mm}
+#proposta .p-for{font-size:11pt;color:var(--p-ink-2)}
+#proposta .p-for b{color:var(--p-ink)}
+#proposta h2{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:14pt;line-height:1.05;margin:0 0 3mm}
+#proposta .sec{margin-top:6mm;break-inside:avoid}
+#proposta .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-top:6mm}
+#proposta .kpi{border:1px solid var(--p-line);border-radius:3mm;padding:3.5mm 4mm}
+#proposta .kpi .l{font-family:var(--font-mono);font-size:7pt;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--p-ink-3)}
+#proposta .kpi .v{font-family:var(--font-display);font-weight:800;font-size:20pt;line-height:1.05;margin-top:1.5mm;white-space:nowrap}
+#proposta .kpi .s{font-family:var(--font-mono);font-size:7pt;color:var(--p-ink-3);margin-top:1mm}
+#proposta .kpi.hero{background:var(--p-lime);border-color:var(--p-lime)}
+#proposta .kpi.hero .l,#proposta .kpi.hero .s{color:var(--p-ink)}
+#proposta .cols{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+#proposta table{width:100%;border-collapse:collapse}
+#proposta td,#proposta th{padding:1.3mm 0;border-bottom:1px solid var(--p-line);vertical-align:top}
+#proposta td.n,#proposta th.n{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:3mm}
+#proposta td.n.t{font-family:var(--font-ui);white-space:normal;font-weight:600;color:var(--p-ink)}
+#proposta td:first-child{color:var(--p-ink-2)}
+#proposta tr.sub td{color:var(--p-ink-3);font-size:9pt}
+#proposta tr.tot td{border-top:2px solid var(--p-ink);border-bottom:none;font-weight:700;color:var(--p-ink);font-size:11pt;padding-top:2.5mm}
+#proposta th{font-family:var(--font-mono);font-size:7pt;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--p-ink-3);text-align:left;border-bottom:2px solid var(--p-ink)}
+#proposta .yr td{padding:1.4mm 0}
+#proposta .yr td.pos{color:#0E6640}
+#proposta .yr td.neg{color:#9E3208}
+#proposta .chart{border:1px solid var(--p-line);border-radius:3mm;padding:3mm}
+#proposta .chart img{width:100%;display:block}
+#proposta .note{font-size:8.5pt;color:var(--p-ink-3);margin-top:2mm}
+#proposta .txt{white-space:pre-line;color:var(--p-ink-2);font-size:9pt}
+#proposta .assume{display:grid;grid-template-columns:1fr 1fr;gap:0 7mm;font-size:9pt}
+#proposta .sign{display:grid;grid-template-columns:1fr 1fr;gap:12mm;margin-top:14mm}
+#proposta .sign div{border-top:1px solid var(--p-ink);padding-top:1.5mm;font-size:8.5pt;color:var(--p-ink-2)}
+#proposta .p-foot{margin-top:8mm;padding-top:3mm;border-top:1px solid var(--p-line);font-family:var(--font-mono);font-size:7pt;color:var(--p-ink-3);line-height:1.6}
+#proposta .fin{background:var(--p-soft);border-radius:3mm;padding:3mm 4mm;margin-top:3mm;font-size:9pt}
+#proposta .fin b{font-family:var(--font-mono)}
 </style>
 </head>
 <body>
@@ -183,7 +232,7 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
       <h1>Simulador de Vendas Solar</h1>
       <div class="subtitle">Dimensiona o sistema, calcula o preço e mostra ao cliente quanto poupa e quando recupera o investimento.</div>
     </div>
-    <div class="meta"><span id="today"></span> · v1.1</div>
+    <div class="meta"><span id="today"></span> · v1.2</div>
   </header>
 
   <div class="toolbar no-print">
@@ -445,6 +494,35 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
         <button class="btn sm" type="button" id="cfg-add-perfil" style="margin-top:var(--sp-3)">+ Adicionar perfil</button>
       </div>
 
+      <div class="card">
+        <div class="card-title">Empresa e proposta em PDF</div>
+        <div class="grid grid-3" id="cfg-empresa">
+          <div><label class="field-label" for="e-nome">Nome da empresa</label><input class="input" id="e-nome" data-e="nome" type="text"></div>
+          <div><label class="field-label" for="e-nif">NIF</label><input class="input" id="e-nif" data-e="nif" type="text"></div>
+          <div><label class="field-label" for="e-vendedor">Comercial responsável</label><input class="input" id="e-vendedor" data-e="vendedor" type="text"></div>
+          <div><label class="field-label" for="e-telefone">Telefone</label><input class="input" id="e-telefone" data-e="telefone" type="text"></div>
+          <div><label class="field-label" for="e-email">Email</label><input class="input" id="e-email" data-e="email" type="text"></div>
+          <div><label class="field-label" for="e-site">Site</label><input class="input" id="e-site" data-e="site" type="text"></div>
+          <div><label class="field-label" for="e-morada">Morada</label><input class="input" id="e-morada" data-e="morada" type="text"></div>
+          <div><label class="field-label" for="e-validade">Validade da proposta (dias)</label><input class="input" id="e-validade" data-e="validadeDias" type="number" min="1" step="1"></div>
+          <div><label class="field-label" for="e-prazo">Prazo de instalação</label><input class="input" id="e-prazo" data-e="prazo" type="text"></div>
+        </div>
+        <div class="grid grid-2" style="margin-top:var(--sp-4)">
+          <div><label class="field-label" for="e-garantias">Garantias</label><textarea class="input" id="e-garantias" data-e="garantias" rows="4" style="padding:var(--sp-3);resize:vertical"></textarea></div>
+          <div><label class="field-label" for="e-condicoes">Condições comerciais</label><textarea class="input" id="e-condicoes" data-e="condicoes" rows="4" style="padding:var(--sp-3);resize:vertical"></textarea></div>
+        </div>
+        <div style="margin-top:var(--sp-4)">
+          <span class="field-label">Logótipo</span>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3)">
+            <img id="e-logo-prev" alt="Logótipo atual" style="max-height:48px;max-width:180px;background:#fff;border-radius:6px;padding:4px" hidden>
+            <label class="btn sm" for="e-logo" style="margin:0">Escolher imagem</label>
+            <input type="file" id="e-logo" accept="image/*" hidden>
+            <button class="btn ghost sm" type="button" id="e-logo-del" hidden>Remover</button>
+          </div>
+          <span class="hint">Aparece no topo da proposta. Sem logótipo, aparece o nome da empresa.</span>
+        </div>
+      </div>
+
       <div id="cfg-groups" class="stack"></div>
     </div>
   </section>
@@ -452,6 +530,7 @@ table.data td .input[type=text]{min-width:160px} table.data td .input[type=numbe
   <footer class="page-footer">simulador-solar · estimativas com base nos parâmetros configurados; não substitui estudo técnico no local · gerado localmente</footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="proposta" aria-hidden="true"></div>
 
 <script src="vendor/chart.umd.js"></script>
 <script>
@@ -478,6 +557,12 @@ const DEFAULT_CONFIG = {
     { nome: 'Comércio / Serviços', diurno: 75 },
     { nome: 'Indústria (turno diurno)', diurno: 85 }
   ],
+  empresa: {
+    nome: 'A Sua Empresa Solar', nif: '', vendedor: '', telefone: '', email: '', site: '', morada: '', logo: '',
+    validadeDias: 30, prazo: '2 a 4 semanas após adjudicação',
+    garantias: 'Painéis: 12 anos de produto e 25 anos de rendimento.\nInversor: 10 anos.\nInstalação e mão de obra: 2 anos.',
+    condicoes: '50% na adjudicação e 50% após a instalação.\nInclui projeto, material, instalação, ligação e registo da UPAC.\nNão inclui obras de construção civil nem reforço da instalação elétrica, se necessários.'
+  },
   params: {
     perdas: 14, degradacao: 0.5, vidaUtil: 25,
     inversorKwp: 180, estruturaKwp: 90, instalacaoKwp: 150, custoFixo: 450,
@@ -557,6 +642,7 @@ function mergeConfig(c) {
     paineis: Array.isArray(c.paineis) && c.paineis.length ? c.paineis : d.paineis,
     regioes: Array.isArray(c.regioes) && c.regioes.length ? c.regioes : d.regioes,
     perfis:  Array.isArray(c.perfis)  && c.perfis.length  ? c.perfis  : d.perfis,
+    empresa: Object.assign(d.empresa, c.empresa || {}),
     params: Object.assign(d.params, c.params || {})
   };
 }
@@ -890,7 +976,7 @@ function buildConfigUI() {
 function fillParams() {
   for (const [k, v] of Object.entries(config.params)) { const el = $('p-' + k); if (el) el.value = v; }
 }
-function reloadConfigUI() { Object.values(editors).forEach(e => e.draw()); fillParams(); refreshSelects(); render(); }
+function reloadConfigUI() { Object.values(editors).forEach(e => e.draw()); fillParams(); fillEmpresa(); refreshSelects(); render(); }
 
 /* ===================== EVENTOS ===================== */
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
@@ -954,9 +1040,178 @@ $('cfg-reset').onclick = () => {
 };
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 if (embedded) { $('btn-print').hidden = true; $('cfg-download').hidden = true; }
-$('btn-print').onclick = () => { setTab('sim'); setTimeout(() => window.print(), 150); };
-window.addEventListener('beforeprint', () => document.documentElement.setAttribute('data-theme', 'light'));
-window.addEventListener('afterprint', () => document.documentElement.removeAttribute('data-theme'));
+/* ===================== PROPOSTA EM PDF ===================== */
+let tituloOriginal = document.title;
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function dataPt(d) { const z = (n) => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()}`; }
+
+function chartImage(r, inp) {
+  if (typeof Chart === 'undefined') return '';
+  const cv = document.createElement('canvas'); cv.width = 1400; cv.height = 360;
+  const labels = [0, ...r.anos.map(y => y.a)];
+  const data = [inp.financiar ? 0 : -Math.round(r.investimentoCliente), ...r.anos.map(y => Math.round(y.acum))];
+  const ink = '#55695C', grid = '#E4E0D5';
+  const ch = new Chart(cv, {
+    type: 'line',
+    data: { labels, datasets: [
+      { data, borderColor: '#5E7D00', backgroundColor: 'rgba(94,125,0,0.13)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 5 },
+      { data: labels.map(() => 0), borderColor: '#8A9A8F', borderDash: [10, 10], pointRadius: 0, borderWidth: 2 }
+    ]},
+    options: {
+      responsive: false, animation: false, devicePixelRatio: 1,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      layout: { padding: { right: 12, top: 8 } },
+      scales: {
+        y: { grid: { color: grid }, border: { display: false }, ticks: { color: ink, font: { family: 'JetBrains Mono', size: 22 }, callback: (v) => eur(v), maxTicksLimit: 7 } },
+        x: { grid: { display: false }, ticks: { color: ink, font: { family: 'JetBrains Mono', size: 22 }, maxRotation: 0, autoSkip: false, callback: (v, i) => (i % 5 === 0 ? 'Ano ' + i : '') } }
+      }
+    }
+  });
+  const url = cv.toDataURL('image/png'); ch.destroy(); return url;
+}
+
+function buildProposal() {
+  if (!lastSim) render();
+  const { inp, r } = lastSim, P = config.params, E = config.empresa;
+  const hoje = new Date(), validade = addDays(hoje, E.validadeDias || 30);
+  const z = (n) => String(n).padStart(2, '0');
+  const ref = 'P-' + hoje.getFullYear() + z(hoje.getMonth() + 1) + z(hoje.getDate()) + '-' + (currentId ? currentId.slice(-4) : z(hoje.getHours()) + z(hoje.getMinutes())).toUpperCase();
+  const nome = inp.nome || 'Cliente';
+  const h = escapeHtml;
+  const contactos = [E.morada, E.telefone, E.email, E.site, E.nif ? 'NIF ' + E.nif : ''].filter(Boolean).map(h).join(' · ');
+  const brand = E.logo ? `<img src="${E.logo}" alt="">` : `<div class="nm">${h(E.nome || '')}</div>`;
+  const pay = isFinite(r.payback) ? `${num(r.payback, 1)} anos` : '—';
+  const anosMostrar = [1, 2, 3, 5, 10, 15, 20, 25, P.vidaUtil].filter((a, i, arr) => a <= P.vidaUtil && arr.indexOf(a) === i);
+  const contClient = $('c-contacto').value.trim();
+  const rowsH = (list) => list.map(([l, v, c]) => `<tr class="${c || ''}"><td>${l}</td><td class="n${/^[\d€−≈+-]/.test(v) ? '' : ' t'}">${v}</td></tr>`).join('');
+
+  const sistema = rowsH([
+    ['Painéis solares', `${r.n} × ${h(inp.painel.nome)}`],
+    ['Potência instalada', `${num(r.kwp, 2)} kWp`],
+    ...(r.area ? [['Área ocupada (aprox.)', `${num(r.area, 1)} m²`]] : []),
+    ['Inversor', inp.bateria ? 'Híbrido, com monitorização' : 'Com monitorização'],
+    ...(inp.bateria ? [['Bateria', `${num(inp.bateriaKwh, 1)} kWh`]] : []),
+    ['Produção no 1.º ano', `${num(r.a1.prod)} kWh`],
+    ['Consumo anual', `${num(r.consumoAnual)} kWh`],
+    ['Consumo coberto pelo solar', `${num(r.autoSuf * 100)}%`],
+    ['CO₂ evitado por ano', `${num(r.co2, 2)} t`],
+  ]);
+  const preco = rowsH([
+    ['Preço do sistema (s/ IVA)', eur(r.precoTabela)],
+    ...(r.descontoEur ? [[`Desconto (${num(inp.desconto * 100, 1)}%)`, '−' + eur(r.descontoEur)]] : []),
+    [`IVA (${num(P.iva)}%)`, eur(r.iva)],
+    ...(r.apoio ? [['Apoio estatal estimado', '−' + eur(r.apoio)]] : []),
+    [r.apoio ? 'Investimento final (após apoio)' : 'Investimento total (c/ IVA)', eur(r.investimentoCliente), 'tot'],
+  ]);
+  const fin = inp.financiar ? `<div class="fin">Financiamento: <b>${P.prazoMeses} × ${eur(r.prestacao, 2)}</b> · taxa ${num(P.taxaJuro, 1)}% · total <b>${eur(r.totalPago)}</b>. Sujeito a aprovação.</div>` : '';
+  const apoioNota = r.apoio ? '<div class="note">Apoio sujeito às regras do programa e à aprovação da candidatura.</div>' : '';
+
+  const anos = r.anos.filter(y => anosMostrar.includes(y.a)).map(y => `<tr>
+    <td>${y.a}</td><td class="n">${num(y.prod)} kWh</td><td class="n">€${num(y.preco, 3)}</td><td class="n">${eur(y.poupanca)}</td>
+    ${inp.financiar ? `<td class="n">${y.pagFin ? '−' + eur(y.pagFin) : '—'}</td>` : ''}
+    <td class="n ${y.acum >= 0 ? 'pos' : 'neg'}">${eur(y.acum)}</td></tr>`).join('');
+
+  const pressupostos = [
+    ['Preço atual da eletricidade', `€${num(inp.tarifa, 3)}/kWh`],
+    ['Subida anual da eletricidade', `${num(P.inflacaoEnergia, 1)}%`],
+    ['Produção de referência (' + h(inp.regiao.nome) + ')', `${num(inp.regiao.producao)} kWh/kWp`],
+    ['Perdas do sistema', `${num(P.perdas)}%`],
+    ['Degradação anual dos painéis', `${num(P.degradacao, 1)}%`],
+    ['Consumo durante o dia', `${num(inp.perfil.diurno)}%`],
+    ['Venda do excedente à rede', `€${num(P.precoExcedente, 3)}/kWh`],
+    ['Manutenção anual', eur(P.manutencao)],
+  ];
+  const half = Math.ceil(pressupostos.length / 2);
+
+  $('proposta').innerHTML = `
+  <section class="pg">
+    <header class="p-head">
+      <div class="p-brand">${brand}${E.logo && E.nome ? `<div class="ct" style="font-weight:600;color:var(--p-ink)">${h(E.nome)}</div>` : ''}<div class="ct">${contactos}</div></div>
+      <div class="p-ref">Proposta n.º <b>${ref}</b><br>Data <b>${dataPt(hoje)}</b><br>Válida até <b>${dataPt(validade)}</b></div>
+    </header>
+
+    <p class="eyeb" style="margin-top:6mm">Proposta comercial</p>
+    <h1>Sistema solar fotovoltaico</h1>
+    <div class="p-for">Preparada para <b>${h(nome)}</b>${contClient ? ' · ' + h(contClient) : ''} · ${h(inp.regiao.nome)}</div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="l">Potência</div><div class="v">${num(r.kwp, 2)} kWp</div><div class="s">${r.n} painéis</div></div>
+      <div class="kpi"><div class="l">${inp.financiar ? 'Prestação mensal' : 'Investimento'}</div><div class="v">${inp.financiar ? eur(r.prestacao) : eur(r.investimentoCliente)}</div><div class="s">${inp.financiar ? P.prazoMeses + ' meses' : 'IVA incluído'}</div></div>
+      <div class="kpi"><div class="l">Poupança anual</div><div class="v">${eur(r.a1.poupanca)}</div><div class="s">≈ ${eur(r.a1.poupanca / 12)} por mês</div></div>
+      <div class="kpi hero"><div class="l">Retorno</div><div class="v">${pay}</div><div class="s">${P.vidaUtil} anos: +${eur(Math.max(0, r.ganhoLiquido))}</div></div>
+    </div>
+
+    <div class="cols sec">
+      <div><p class="eyeb">O seu sistema</p><h2>Equipamento e produção</h2><table>${sistema}</table></div>
+      <div><p class="eyeb">Investimento</p><h2>Preço</h2><table>${preco}</table>${fin}${apoioNota}</div>
+    </div>
+
+    <div class="sec">
+      <p class="eyeb">Rentabilidade</p><h2>Saldo acumulado ao longo de ${P.vidaUtil} anos</h2>
+      <div class="chart"><img src="${chartImage(r, inp)}" alt=""></div>
+      <div class="note">${inp.financiar ? 'Poupança acumulada menos as prestações pagas.' : 'Começa no valor investido e sobe com a poupança de cada ano.'} Acima da linha tracejada, o sistema já se pagou. Fatura de eletricidade atual estimada: ${eur(r.faturaAntes)}/ano.</div>
+    </div>
+  </section>
+
+  <section class="pg">
+    <header class="p-head">
+      <div class="p-brand">${brand}</div>
+      <div class="p-ref">Proposta n.º <b>${ref}</b><br>${h(nome)}</div>
+    </header>
+
+    <div class="sec">
+      <p class="eyeb">Projeção</p><h2>Poupança ano a ano</h2>
+      <table class="yr"><thead><tr><th>Ano</th><th class="n">Produção</th><th class="n">Preço eletricidade</th><th class="n">Poupança</th>${inp.financiar ? '<th class="n">Prestações</th>' : ''}<th class="n">Saldo acumulado</th></tr></thead><tbody>${anos}</tbody></table>
+      <div class="note">Em ${P.vidaUtil} anos, poupança total estimada de ${eur(r.poupancaTotal)}.</div>
+    </div>
+
+    <div class="sec">
+      <p class="eyeb">Pressupostos</p><h2>Como calculámos</h2>
+      <div class="assume"><table>${rowsH(pressupostos.slice(0, half))}</table><table>${rowsH(pressupostos.slice(half))}</table></div>
+    </div>
+
+    <div class="cols sec">
+      <div><p class="eyeb">Garantias</p><h2>Garantias</h2><div class="txt">${h(E.garantias || '')}</div></div>
+      <div><p class="eyeb">Condições</p><h2>Condições</h2><div class="txt">${E.prazo ? 'Prazo de instalação: ' + h(E.prazo) + '\n' : ''}${h(E.condicoes || '')}</div></div>
+    </div>
+
+    <div class="sign">
+      <div>Pela empresa${E.vendedor ? ' · ' + h(E.vendedor) : ''}<br><br>Data ___/___/______</div>
+      <div>Aceito a proposta · ${h(nome)}<br><br>Data ___/___/______</div>
+    </div>
+
+    <footer class="p-foot">
+      ${h(E.nome || '')}${contactos ? ' · ' + contactos : ''}<br>
+      Valores estimados com base no consumo indicado pelo cliente e em dados médios de produção solar da região. A produção real depende da orientação, inclinação, sombreamentos e condições meteorológicas, e será confirmada na visita técnica. Proposta válida até ${dataPt(validade)}.
+    </footer>
+  </section>`;
+  document.title = `Proposta ${ref} - ${nome}`;
+}
+function printProposal() { setTab('sim'); render(); buildProposal(); setTimeout(() => window.print(), 300); }
+$('btn-print').onclick = printProposal;
+window.addEventListener('beforeprint', () => { if (!$('proposta').innerHTML) buildProposal(); });
+window.addEventListener('afterprint', () => { document.title = tituloOriginal; $('proposta').innerHTML = ''; });
+
+/* Empresa (configuração) */
+function fillEmpresa() {
+  document.querySelectorAll('[data-e]').forEach(el => { el.value = config.empresa[el.dataset.e] ?? ''; });
+  $('e-logo-prev').hidden = !config.empresa.logo; $('e-logo-del').hidden = !config.empresa.logo;
+  if (config.empresa.logo) $('e-logo-prev').src = config.empresa.logo;
+}
+$('tab-config').addEventListener('input', (e) => {
+  const k = e.target.dataset && e.target.dataset.e; if (!k) return;
+  config.empresa[k] = e.target.type === 'number' ? (+e.target.value || 0) : e.target.value; saveConfig();
+});
+$('e-logo').onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  const img = new Image(); img.src = URL.createObjectURL(f);
+  try { await img.decode(); } catch { toast('Imagem inválida'); return; }
+  const k = Math.min(1, 600 / img.width, 200 / img.height);
+  const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+  cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(img.src);
+  config.empresa.logo = cv.toDataURL('image/png'); saveConfig(); fillEmpresa(); toast('Logótipo guardado');
+};
+$('e-logo-del').onclick = () => { config.empresa.logo = ''; saveConfig(); fillEmpresa(); };
 
 matchMedia('(prefers-color-scheme: light)').addEventListener('change', rebuildCharts);
 new MutationObserver(rebuildCharts).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -1198,6 +1453,7 @@ refreshSelects();
 $('c-regiao').value = 2; $('c-tipo').value = 1;
 render();
 renderHist();
+fillEmpresa();
 document.fonts && document.fonts.ready.then(rebuildCharts);
 </script>
 </body>
