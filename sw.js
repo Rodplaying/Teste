@@ -1,5 +1,5 @@
 /* Service worker do Simulador Solar: funciona sem internet e recebe atualizações automaticamente. */
-const VERSION = 'v1.2.1';
+const VERSION = 'v1.2.2';
 const CACHE = 'simulador-solar-' + VERSION;
 const CORE = [
   './', './index.html', './manifest.webmanifest', './vendor/chart.umd.js',
