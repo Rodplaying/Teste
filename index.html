@@ -652,7 +652,7 @@ function saveConfig() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c
 function group(n, dec = 0) {
   const neg = n < 0; const s = Math.abs(n).toFixed(dec);
   const [i, d] = s.split('.');
-  const g = i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const g = i.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
   return (neg ? '−' : '') + g + (d ? ',' + d : '');
 }
 const eur = (n, dec = 0) => (n < 0 ? '−€' : '€') + group(Math.abs(n), dec);
@@ -725,7 +725,10 @@ function simular(inp) {
 
   // Energia ano a ano
   const anos = [];
-  let acum = inp.financiar ? 0 : -investimentoCliente;
+  // Saldo acumulado = poupança acumulada − custo total para o cliente
+  // (pronto pagamento: o investimento; financiado: o total das prestações, com juros).
+  const custoTotalCliente = inp.financiar ? totalPago : investimentoCliente;
+  let acum = -custoTotalCliente;
   let payback = Infinity, poupancaTotal = 0;
   const diurno = consumoAnual * perfil.diurno / 100;
   const noturno = consumoAnual - diurno;
@@ -745,20 +748,13 @@ function simular(inp) {
     const poupanca = autoconsumo * preco + excedente * P.precoExcedente - manut;
     const mesesFin = inp.financiar ? Math.max(0, Math.min(12, P.prazoMeses - (a - 1) * 12)) : 0;
     const pagFin = prestacao * mesesFin;
-    const fluxo = poupanca - pagFin;
     const antes = acum;
-    acum += fluxo;
-    if (!inp.financiar && payback === Infinity && acum >= 0 && fluxo > 0) payback = (a - 1) + (-antes / fluxo);
+    acum += poupanca;
+    if (payback === Infinity && acum >= 0 && poupanca > 0) payback = (a - 1) + (-antes / poupanca);
     poupancaTotal += poupanca;
     anos.push({ a, prod, autoconsumo, excedente, preco, poupanca, pagFin, acum, manut });
   }
-  if (inp.financiar) {
-    // com financiamento: retorno = quando a poupança acumulada cobre o total pago
-    let s = 0;
-    for (const y of anos) { const antes = s; s += y.poupanca; if (s >= totalPago && payback === Infinity) payback = (y.a - 1) + (totalPago - antes) / y.poupanca; }
-  }
   const a1 = anos[0] || { prod: 0, autoconsumo: 0, excedente: 0, poupanca: 0 };
-  const custoTotalCliente = inp.financiar ? totalPago : investimentoCliente;
   const ganhoLiquido = poupancaTotal - custoTotalCliente;
   const roi = custoTotalCliente > 0 ? ganhoLiquido / custoTotalCliente : 0;
   const faturaAntes = consumoAnual * inp.tarifa;
@@ -768,7 +764,7 @@ function simular(inp) {
     custoPaineis, custoInversor, custoEstrutura, custoMO, custoFixo: P.custoFixo, custoBat, custoTotal,
     precoTabela, descontoEur, precoSemIva, iva, precoFinal, apoio, investimentoCliente,
     comissao, lucro, margemReal, prestacao, totalPago,
-    anos, a1, payback, poupancaTotal, ganhoLiquido, roi, faturaAntes,
+    custoTotalCliente, anos, a1, payback, poupancaTotal, ganhoLiquido, roi, faturaAntes,
     autoSuf: consumoAnual ? a1.autoconsumo / consumoAnual : 0,
     taxaAuto: a1.prod ? a1.autoconsumo / a1.prod : 0,
     co2: a1.prod * 0.15 / 1000  // t CO2/ano (fator médio rede PT ~150 g/kWh)
@@ -889,7 +885,7 @@ function drawCharts(r, inp) {
   const cfgCash = {
     type: 'line',
     data: { labels: [0, ...labels], datasets: [
-      { label: inp.financiar ? 'Saldo com financiamento' : 'Saldo acumulado', data: [inp.financiar ? 0 : -Math.round(r.investimentoCliente), ...acum],
+      { label: 'Saldo acumulado', data: [-Math.round(r.custoTotalCliente), ...acum],
         borderColor: PALETTE[0], backgroundColor: tk('--chart-fill'), fill: true, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 },
       { label: 'Ponto de equilíbrio', data: [0, ...labels.map(() => 0)], borderColor: PALETTE[6], borderDash: [5, 5], pointRadius: 0, borderWidth: 1.5 }
     ]},
@@ -1049,7 +1045,7 @@ function chartImage(r, inp) {
   if (typeof Chart === 'undefined') return '';
   const cv = document.createElement('canvas'); cv.width = 1400; cv.height = 360;
   const labels = [0, ...r.anos.map(y => y.a)];
-  const data = [inp.financiar ? 0 : -Math.round(r.investimentoCliente), ...r.anos.map(y => Math.round(y.acum))];
+  const data = [-Math.round(r.custoTotalCliente), ...r.anos.map(y => Math.round(y.acum))];
   const ink = '#55695C', grid = '#E4E0D5';
   const ch = new Chart(cv, {
     type: 'line',
@@ -1149,7 +1145,7 @@ function buildProposal() {
     <div class="sec">
       <p class="eyeb">Rentabilidade</p><h2>Saldo acumulado ao longo de ${P.vidaUtil} anos</h2>
       <div class="chart"><img src="${chartImage(r, inp)}" alt=""></div>
-      <div class="note">${inp.financiar ? 'Poupança acumulada menos as prestações pagas.' : 'Começa no valor investido e sobe com a poupança de cada ano.'} Acima da linha tracejada, o sistema já se pagou. Fatura de eletricidade atual estimada: ${eur(r.faturaAntes)}/ano.</div>
+      <div class="note">${inp.financiar ? `Começa no total das prestações (${eur(r.totalPago)}, juros incluídos) e sobe com a poupança de cada ano.` : `Começa no valor investido (${eur(r.investimentoCliente)}) e sobe com a poupança de cada ano.`} Acima da linha tracejada, o sistema já se pagou. Fatura de eletricidade atual estimada: ${eur(r.faturaAntes)}/ano.</div>
     </div>
   </section>
 
